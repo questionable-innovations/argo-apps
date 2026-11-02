@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gpu-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  sources:
+    # The upstream chart, pinned. Values are read from this repo via the `values` ref below,
+    # so the chart is never forked or vendored.
+    - repoURL: https://helm.ngc.nvidia.com/nvidia
+      chart: gpu-operator
+      targetRevision: "v24.3.0"
+      helm:
+        releaseName: gpu-operator-1722298273
+        valueFiles:
+          - $values/apps/infra/gpu-operator/values.yaml
+    - repoURL: https://github.com/LaSpruca/argo-apps.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-operator
+  syncPolicy:
+    # Auto-sync is deliberately off until each app's first diff has been reviewed.
+    # See README.md "Adopting the live cluster" before enabling it.
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: storyteller
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: storyteller
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: storyteller
+      name: storyteller
+    spec:
+      containers:
+      - env:
+        - name: TZ
+          value: Pacific/Auckland
+        - name: PUID
+          value: '1000'
+        - name: PGID
+          value: '1000'
+        - name: NODE_OPTIONS
+          value: --max-old-space-size=4096
+        - name: STORYTELLER_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: STORYTELLER_SECRET_KEY
+              name: storyteller-secret
+        image: registry.gitlab.com/storyteller-platform/storyteller:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 5
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          tcpSocket:
+            port: 8001
+          timeoutSeconds: 1
+        name: storyteller
+        ports:
+        - containerPort: 8001
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8001
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: '4'
+            memory: 6Gi
+          requests:
+            cpu: 250m
+            memory: 1Gi
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: storyteller
+      name: data
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storyteller
+  namespace: media
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8001
+  selector:
+    podinate.com/pod: storyteller
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '75'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '300'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '300'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: storyteller
+  name: storyteller
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: storyteller.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: storyteller
+            port:
+              number: 8001
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - storyteller.bloflix.com
+    secretName: storyteller-tls

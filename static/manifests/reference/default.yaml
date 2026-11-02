@@ -1,0 +1,239 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2025-01-14T04:11:57Z"
+    generation: 1
+    name: ghost
+    namespace: default
+    resourceVersion: "182384511"
+    uid: 49e93627-9d51-4811-bf99-2abb1138a193
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: ghost
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: ghost
+        name: ghost
+      spec:
+        containers:
+        - env:
+          - name: NODE_ENV
+            value: development
+          - name: database__connection__filename
+            value: /var/lib/ghost/content/data/ghost.db
+          image: ghost
+          imagePullPolicy: Always
+          name: ghost
+          ports:
+          - containerPort: 2368
+            name: ghost
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/ghost/content
+            name: content
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: ghost
+        name: content
+        namespace: default
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: ghost-7479d74bbf
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: ghost-7479d74bbf
+    updatedReplicas: 1
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-01-14T04:11:57Z"
+    name: ghost
+    namespace: default
+    resourceVersion: "37300267"
+    uid: d61eb400-90b1-4dfb-af2e-c3ef13c4c9d1
+  spec:
+    clusterIP: 10.43.178.203
+    clusterIPs:
+    - 10.43.178.203
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 2368
+      protocol: TCP
+      targetPort: 2368
+    selector:
+      podinate.com/pod: ghost
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-27T11:26:32Z"
+    labels:
+      component: apiserver
+      provider: kubernetes
+    name: kubernetes
+    namespace: default
+    resourceVersion: "62"
+    uid: 6375b7d6-a3dc-4292-bf1d-83f64bea6c4e
+  spec:
+    clusterIP: 10.43.0.1
+    clusterIPs:
+    - 10.43.0.1
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 6443
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2025-01-14T04:11:57Z"
+    generation: 2
+    labels:
+      podinate.com/pod: ghost
+    name: ghost
+    namespace: default
+    resourceVersion: "185442544"
+    uid: fe9be63a-e76b-4c9b-8ef8-807aea33b8be
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: ghost.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: ghost
+              port:
+                number: 2368
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIBdjCCAR2gAwIBAgIBADAKBggqhkjOPQQDAjAjMSEwHwYDVQQDDBhrM3Mtc2Vy
+      dmVyLWNhQDE3MjIwNzk1OTEwHhcNMjQwNzI3MTEyNjMxWhcNMzQwNzI1MTEyNjMx
+      WjAjMSEwHwYDVQQDDBhrM3Mtc2VydmVyLWNhQDE3MjIwNzk1OTEwWTATBgcqhkjO
+      PQIBBggqhkjOPQMBBwNCAARHVzM4NeiJe6D/4k6YHDMY0UlwGSkXrf6/IlDgXG+m
+      FKfEmC9LFcnGoeGBHGYs75JEX5gBvEcQ29LajM4xzuleo0IwQDAOBgNVHQ8BAf8E
+      BAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUYTYcMhMi25g83Ai0tkDR
+      2v4ywvMwCgYIKoZIzj0EAwIDRwAwRAIgHOnePfdnaP4S3KpojdcGKlWQsDFPYwEv
+      9bPRIfqs6cECIHLvGORVz57RhD7pVnuB8D+YZaol6tVQlRwYvqLxoZiJ
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2024-07-27T21:50:12Z"
+    name: kube-root-ca.crt
+    namespace: default
+    resourceVersion: "61483"
+    uid: 2ade04c9-a7a5-4e70-902d-e58ad2a57c2b
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2025-01-14T00:52:28Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: ghost
+    name: content-ghost-0
+    namespace: default
+    resourceVersion: "37268020"
+    uid: 338074dd-98d8-4635-837f-58c2d480596b
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-338074dd-98d8-4635-837f-58c2d480596b
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    phase: Bound
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: "2024-07-27T21:50:12Z"
+    name: default
+    namespace: default
+    resourceVersion: "61482"
+    uid: 3815deb2-eb0e-4d58-a0c1-2233d33f57aa
+kind: List
+metadata:
+  resourceVersion: ""

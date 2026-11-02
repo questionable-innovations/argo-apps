@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tautulli
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: tautulli
+  serviceName: ''
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-09T17:02:41+12:00'
+      labels:
+        podinate.com/pod: tautulli
+      name: tautulli
+    spec:
+      containers:
+      - env:
+        - name: TZ
+          value: Pacific/Auckland
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        image: lscr.io/linuxserver/tautulli
+        imagePullPolicy: Always
+        name: tautulli
+        ports:
+        - containerPort: 8181
+          name: tautulli
+        volumeMounts:
+        - mountPath: /config
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: tautulli
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tautulli
+  namespace: media
+spec:
+  ports:
+  - port: 80
+    targetPort: 8181
+  selector:
+    podinate.com/pod: tautulli
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: tautulli
+  name: tautulli
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tautulli.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: tautulli
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - tautulli.bloflix.com
+    secretName: tautulli-tls

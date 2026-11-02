@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: qbittorrent
+  serviceName: ''
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-09T17:00:07+12:00'
+      labels:
+        podinate.com/pod: qbittorrent
+      name: qbittorrent
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: lscr.io/linuxserver/qbittorrent
+        imagePullPolicy: Always
+        name: qbittorrent
+        ports:
+        - containerPort: 8080
+          name: qbittorrent
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /data
+          name: media
+      volumes:
+      - name: media
+        persistentVolumeClaim:
+          claimName: media
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: qbittorrent
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    podinate.com/pod: qbittorrent
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: qbittorrent
+  name: qbittorrent
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: qbittorrent.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: qbittorrent
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - qbittorrent.bloflix.com
+    secretName: qbittorrent-tls

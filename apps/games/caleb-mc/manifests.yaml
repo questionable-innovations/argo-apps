@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: caleb-mc
+  namespace: games
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: caleb-mc
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: caleb-mc
+      name: caleb-mc
+    spec:
+      containers:
+      - env:
+        - name: EULA
+          value: 'true'
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: itzg/minecraft-server
+        imagePullPolicy: Always
+        name: caleb-mc
+        ports:
+        - containerPort: 25565
+          name: caleb-mc
+        volumeMounts:
+        - mountPath: /data
+          name: server-data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: caleb-mc
+      name: server-data
+      namespace: games
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caleb-mc
+  namespace: games
+spec:
+  ports:
+  - nodePort: 31115
+    port: 31115
+    targetPort: 25565
+  selector:
+    podinate.com/pod: caleb-mc
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    podinate.com/pod: caleb-mc
+  name: caleb-mc
+  namespace: games
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: caleb-mc.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: caleb-mc
+            port:
+              number: 25565
+        path: /
+        pathType: Prefix

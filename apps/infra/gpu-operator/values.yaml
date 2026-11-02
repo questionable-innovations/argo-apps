@@ -1,0 +1,41 @@
+# NVIDIA GPU Operator — chart https://helm.ngc.nvidia.com/nvidia, pinned to the live release (v24.3.0).
+# Matches `helm get values gpu-operator-1722298273 -n gpu-operator` exactly.
+#
+# NOTE: the Application sets `helm.releaseName: gpu-operator-1722298273` to preserve the
+# generated names of the node-feature-discovery sub-chart resources already in the cluster.
+driver:
+  enabled: true
+
+toolkit:
+  enabled: true
+  env:
+    # k3s-specific containerd paths — this is what registers the `nvidia` RuntimeClass.
+    - name: CONTAINERD_CONFIG
+      value: /var/lib/rancher/k3s/agent/etc/containerd/config.toml
+    - name: CONTAINERD_SOCKET
+      value: /run/k3s/containerd/containerd.sock
+    - name: CONTAINERD_RUNTIME_CLASS
+      value: nvidia
+    - name: CONTAINERD_SET_AS_DEFAULT
+      value: "true"
+
+devicePlugin:
+  env:
+    - name: PASS_DEVICE_SPECS
+      value: "true"
+    - name: FAIL_ON_INIT_ERROR
+      value: "true"
+    - name: DEVICE_LIST_STRATEGY
+      value: envvar
+    - name: DEVICE_ID_STRATEGY
+      value: uuid
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: all
+    - name: NVIDIA_DRIVER_CAPABILITIES
+      value: compute,compat32,graphics,utility,video
+
+validator:
+  driver:
+    env:
+      - name: DISABLE_DEV_CHAR_SYMLINK_CREATION
+        value: "true"

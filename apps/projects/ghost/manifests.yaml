@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ghost
+  namespace: default
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: ghost
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: ghost
+      name: ghost
+    spec:
+      containers:
+      - env:
+        - name: NODE_ENV
+          value: development
+        - name: database__connection__filename
+          value: /var/lib/ghost/content/data/ghost.db
+        image: ghost
+        imagePullPolicy: Always
+        name: ghost
+        ports:
+        - containerPort: 2368
+          name: ghost
+        volumeMounts:
+        - mountPath: /var/lib/ghost/content
+          name: content
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: ghost
+      name: content
+      namespace: default
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghost
+  namespace: default
+spec:
+  ports:
+  - port: 2368
+    targetPort: 2368
+  selector:
+    podinate.com/pod: ghost
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: ghost
+  name: ghost
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ghost.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: ghost
+            port:
+              number: 2368
+        path: /
+        pathType: Prefix

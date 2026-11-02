@@ -1,0 +1,168 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: domainmod
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: domainmod
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: domainmod
+      name: domainmod
+    spec:
+      containers:
+      - env:
+        - name: PUID
+          value: '1000'
+        - name: TIME_ZONE
+          value: Europe/Zurich
+        - name: TZ
+          value: Pacific/Auckland
+        - name: DOMAINMOD_DATABASE
+          value: domainmod
+        - name: DOMAINMOD_DATABASE_HOST
+          value: domainmod-db
+        - name: DOMAINMOD_PASSWORD
+          value: password1
+        - name: DOMAINMOD_USER
+          value: domainmod
+        - name: PGID
+          value: '1000'
+        image: domainmod/domainmod:latest
+        imagePullPolicy: Always
+        name: domainmod
+        ports:
+        - containerPort: 80
+          name: domainmod
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: domainmod
+      name: config
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: domainmod-db
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: domainmod-db
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: domainmod-db
+      name: domainmod-db
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: domainmod
+        - name: MYSQL_PASSWORD
+          value: password1
+        - name: MYSQL_ROOT_PASSWORD
+          value: password2
+        - name: MYSQL_USER
+          value: domainmod
+        image: lscr.io/linuxserver/mariadb:alpine
+        imagePullPolicy: IfNotPresent
+        name: domainmod-db
+        ports:
+        - containerPort: 3306
+          name: domainmod-db
+        volumeMounts:
+        - mountPath: /config
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: domainmod-db
+      name: config
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: domainmod
+  namespace: rebnz
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    podinate.com/pod: domainmod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: domainmod-db
+  namespace: rebnz
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    podinate.com/pod: domainmod-db
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: domainmod
+  name: domainmod
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: domainmod.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: domainmod
+            port:
+              number: 80
+        path: /
+        pathType: Prefix

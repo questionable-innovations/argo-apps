@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: democratic-csi-bulk-storage
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  sources:
+    # The upstream chart, pinned. Values are read from this repo via the `values` ref below,
+    # so the chart is never forked or vendored.
+    - repoURL: https://democratic-csi.github.io/charts/
+      chart: democratic-csi
+      targetRevision: "0.14.6"
+      helm:
+        releaseName: bulk-storage
+        valueFiles:
+          - $values/apps/infra/democratic-csi-bulk-storage/values.yaml
+    - repoURL: https://github.com/LaSpruca/argo-apps.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: storage
+  syncPolicy:
+    # Auto-sync is deliberately off until each app's first diff has been reviewed.
+    # See README.md "Adopting the live cluster" before enabling it.
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

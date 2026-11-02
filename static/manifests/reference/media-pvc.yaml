@@ -1,0 +1,592 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2026-02-28T02:13:27Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: cleanuparr
+    name: config-cleanuparr-0
+    namespace: media
+    resourceVersion: "128786861"
+    uid: d61661c2-0b2c-4dcb-b18f-22095d11e0d4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-d61661c2-0b2c-4dcb-b18f-22095d11e0d4
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T00:22:49Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: nzbget
+    name: config-nzbget-0
+    namespace: media
+    resourceVersion: "246158"
+    uid: e2583c97-70fc-412c-a5b2-f11b210b8a2c
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-e2583c97-70fc-412c-a5b2-f11b210b8a2c
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-30T00:33:30Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: overseerr
+    name: config-overseerr-0
+    namespace: media
+    resourceVersion: "413140"
+    uid: d173ec69-49b7-4309-a4ad-215b96af6a26
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-d173ec69-49b7-4309-a4ad-215b96af6a26
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-05-04T11:21:45Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: plex
+    name: config-plex-0
+    namespace: media
+    resourceVersion: "59989833"
+    uid: d374326b-e0ec-41a0-a205-e1654c04edd6
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 128Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-d374326b-e0ec-41a0-a205-e1654c04edd6
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 128Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T01:22:27Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: prowlarr
+    name: config-prowlarr-0
+    namespace: media
+    resourceVersion: "253202"
+    uid: 3086a1d2-aa0b-48ef-be5f-d9dc68cfa23c
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-3086a1d2-aa0b-48ef-be5f-d9dc68cfa23c
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T03:15:56Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: qbittorrent
+    name: config-qbittorrent-0
+    namespace: media
+    resourceVersion: "266559"
+    uid: 1a8fe1bb-5c39-4c5e-bcdb-b480f4588fb5
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-1a8fe1bb-5c39-4c5e-bcdb-b480f4588fb5
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T02:30:02Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: radarr
+    name: config-radarr-0
+    namespace: media
+    resourceVersion: "261199"
+    uid: 157d00da-de2f-4550-b4c7-089dafd84163
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-157d00da-de2f-4550-b4c7-089dafd84163
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-28T23:57:11Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: sonarr
+    name: config-sonarr-0
+    namespace: media
+    resourceVersion: "243047"
+    uid: 9e5ef976-e58c-4a1d-be22-aa4d65b8987e
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-9e5ef976-e58c-4a1d-be22-aa4d65b8987e
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T03:36:48Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: tautulli
+    name: config-tautulli-0
+    namespace: media
+    resourceVersion: "269045"
+    uid: 272bbd38-ccf6-4402-9967-17db49b16deb
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-272bbd38-ccf6-4402-9967-17db49b16deb
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-bulk
+      volume.kubernetes.io/storage-provisioner: nfs-bulk
+    creationTimestamp: "2024-07-28T07:02:14Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: data
+    namespace: media
+    resourceVersion: "126478"
+    uid: c738344a-ea70-4571-bdda-1d439c0e17ad
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 24Ti
+    storageClassName: bulk-storage
+    volumeMode: Filesystem
+    volumeName: pvc-c738344a-ea70-4571-bdda-1d439c0e17ad
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 24Ti
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2026-06-05T05:59:17Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: storyteller
+    name: data-storyteller-0
+    namespace: media
+    resourceVersion: "151408760"
+    uid: c36ac474-c190-4797-b1d8-4ac9963209c1
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 50Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-c36ac474-c190-4797-b1d8-4ac9963209c1
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 50Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+    creationTimestamp: "2025-01-14T04:56:13Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      app.kubernetes.io/component: primary
+      app.kubernetes.io/instance: superset
+      app.kubernetes.io/name: postgresql
+    name: data-superset-postgresql-0
+    namespace: media
+    resourceVersion: "37307753"
+    uid: 8a01399b-1db0-4307-a7ec-6a164688a5a7
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 8Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-8a01399b-1db0-4307-a7ec-6a164688a5a7
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 8Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"local-config-plex-0","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"128Gi"}},"storageClassName":"local-path"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2024-08-08T23:04:49Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: local-config-plex-0
+    namespace: media
+    resourceVersion: "38494909"
+    uid: f2182385-f580-4e14-8d42-10839bf38ad4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 128Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: local-config-plex-0
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 512Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2024-10-21T23:53:24Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: sonarr
+    name: local-config-sonarr-0
+    namespace: media
+    resourceVersion: "17890448"
+    uid: 2f5d16b0-3803-4932-a590-3f212d6ff7a2
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-2f5d16b0-3803-4932-a590-3f212d6ff7a2
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2026-02-27T04:59:20Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: tdarr
+    name: local-config-tdarr-0
+    namespace: media
+    resourceVersion: "128579980"
+    uid: 9e642a0f-b80d-48f1-ab66-436c5ebe9392
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-9e642a0f-b80d-48f1-ab66-436c5ebe9392
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"local-data","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"24Ti"}},"storageClassName":"local-path"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2024-11-30T07:44:30Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: local-data
+    namespace: media
+    resourceVersion: "27024315"
+    uid: fefb7867-419e-4dfd-8992-0549ac620b58
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 24Ti
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-local-data
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 24Ti
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"media","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"80Ti"}},"storageClassName":"local-path"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2025-05-04T10:50:04Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: media
+    namespace: media
+    resourceVersion: "59988661"
+    uid: 8cc379ff-5abb-489c-acff-2d0e22dc59bf
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 80Ti
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: media
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 80Ti
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2026-05-09T05:48:09Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: tdarr-node
+    name: tdarr-temp-tdarr-node-0
+    namespace: media
+    resourceVersion: "145106705"
+    uid: 8c2d8cb8-2d89-430b-acf4-76553b4e16c3
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 200Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-8c2d8cb8-2d89-430b-acf4-76553b4e16c3
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 200Gi
+    phase: Bound
+kind: List
+metadata:
+  resourceVersion: ""

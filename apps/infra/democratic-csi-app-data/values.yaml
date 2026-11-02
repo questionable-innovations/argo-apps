@@ -1,0 +1,33 @@
+# democratic-csi (app-data) — chart https://democratic-csi.github.io/charts/, pinned to the
+# live release (0.14.6). Backs the "app-data" StorageClass with NFS from TrueNAS at 192.168.1.250.
+#
+# The TrueNAS API key is NOT in this repo. The chart reads the whole driver config from the
+# pre-existing in-cluster Secret below (the same name the chart would otherwise generate), so
+# the live credential is reused untouched. `driver.config.driver` must still be set here —
+# the chart uses it outside the secret to pick which templates to render.
+csiDriver:
+  name: nfs-app-data
+
+driver:
+  existingConfigSecret: app-data-democratic-csi-driver-config
+  config:
+    driver: freenas-api-nfs
+
+storageClasses:
+  - name: app-data
+    defaultClass: true
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+    allowVolumeExpansion: true
+    parameters:
+      fsType: nfs
+      detachedVolumesFromSnapshots: "false"
+    mountOptions:
+      - noatime
+      - nfsvers=3
+    secrets:
+      provisioner-secret:
+      controller-publish-secret:
+      node-stage-secret:
+      node-publish-secret:
+      controller-expand-secret:

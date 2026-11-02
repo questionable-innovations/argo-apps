@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    keel.sh/policy: force
+    keel.sh/pollSchedule: '@every 1m'
+    keel.sh/secrets: ghcr-russell
+    keel.sh/trigger: poll
+    kubernetes.io/change-cause: keel automated update, version latest -> main [2026-01-25T02:53:37Z]
+  name: mcp-servers
+  namespace: russell
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-servers
+  template:
+    metadata:
+      annotations:
+        keel.sh/update-time: 2026-01-25 02:53:37.518141738 +0000 UTC m=+53.143605161
+        kubectl.kubernetes.io/restartedAt: '2026-04-22T14:46:52-06:00'
+      labels:
+        app: mcp-servers
+    spec:
+      containers:
+      - envFrom:
+        - secretRef:
+            name: mcp-servers-env
+        image: ghcr.io/russellbloxwich/mcp-servers:main
+        imagePullPolicy: Always
+        name: mcp-servers
+        ports:
+        - containerPort: 8080
+          name: http
+      imagePullSecrets:
+      - name: ghcr-russell
+      serviceAccountName: russell
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-servers
+  namespace: russell
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: mcp-servers
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  name: mcp-servers
+  namespace: russell
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: mcp.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: mcp-servers
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - mcp.bloflix.com
+    secretName: mcp-servers-tls
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: russell
+  namespace: russell

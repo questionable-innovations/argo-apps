@@ -1,0 +1,258 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tdarr
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: tdarr
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: tdarr
+      name: tdarr
+    spec:
+      containers:
+      - env:
+        - name: inContainer
+          value: 'true'
+        - name: internalNode
+          value: 'false'
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: haveagitgat/tdarr:2.71.01
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          periodSeconds: 60
+          successThreshold: 1
+          tcpSocket:
+            port: 8265
+          timeoutSeconds: 5
+        name: tdarr
+        ports:
+        - containerPort: 8265
+          name: tdarr-ui
+        - containerPort: 8266
+          name: tdarr-server
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 30
+          successThreshold: 1
+          tcpSocket:
+            port: 8265
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: '4'
+            memory: 24Gi
+          requests:
+            cpu: 500m
+            memory: 2Gi
+        startupProbe:
+          failureThreshold: 60
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8265
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /app/server
+          name: local-config
+          subPath: server
+        - mountPath: /app/configs
+          name: local-config
+          subPath: configs
+        - mountPath: /app/logs
+          name: local-config
+          subPath: logs
+        - mountPath: /data
+          name: data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: media
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: tdarr
+      name: local-config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tdarr-node
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 0
+  selector:
+    matchLabels:
+      podinate.com/pod: tdarr-node
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: tdarr-node
+      name: tdarr-node
+    spec:
+      containers:
+      - env:
+        - name: inContainer
+          value: 'true'
+        - name: nodeName
+          value: k3s-gpu-node
+        - name: serverIP
+          value: tdarr.media.svc.cluster.local
+        - name: serverPort
+          value: '8266'
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute,utility,video
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: all
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: haveagitgat/tdarr_node:2.71.01
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - pgrep -f Tdarr_Node > /dev/null
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: tdarr-node
+        resources:
+          limits:
+            cpu: '8'
+            memory: 16Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '4'
+            memory: 4Gi
+            nvidia.com/gpu: '1'
+        volumeMounts:
+        - mountPath: /temp
+          name: tdarr-temp
+        - mountPath: /data
+          name: data
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - 'echo "pruning workdirs older than 24h..."
+
+          find /temp -mindepth 1 -maxdepth 1 -type d -name ''tdarr-workDir2-*'' -mtime +1 -exec rm -rf
+          {} + 2>/dev/null || true
+
+          remaining=$(ls -d /temp/tdarr-workDir2-* 2>/dev/null | wc -l)
+
+          echo "prune complete; remaining workdirs: $remaining"
+
+          '
+        image: busybox:1.36
+        imagePullPolicy: IfNotPresent
+        name: prune-old-workdirs
+        volumeMounts:
+        - mountPath: /temp
+          name: tdarr-temp
+      runtimeClassName: nvidia
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: media
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: tdarr-node
+      name: tdarr-temp
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 200Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tdarr
+  namespace: media
+spec:
+  ports:
+  - name: tdarr
+    port: 8265
+    targetPort: 8265
+  - name: server
+    port: 8266
+    targetPort: 8266
+  selector:
+    podinate.com/pod: tdarr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: tdarr
+  name: tdarr
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tdarr.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: tdarr
+            port:
+              number: 8265
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - tdarr.bloflix.com
+    secretName: tdarr-tls

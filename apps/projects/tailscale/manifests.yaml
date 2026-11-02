@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tailscale
+  namespace: rebnz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tailscale
+  template:
+    metadata:
+      labels:
+        app: tailscale
+    spec:
+      containers:
+      - env:
+        - name: TS_AUTHKEY
+          valueFrom:
+            secretKeyRef:
+              key: TS_AUTHKEY
+              name: tailscale-auth
+        - name: TS_KUBE_SECRET
+          value: tailscale-state
+        - name: TS_USERSPACE
+          value: 'false'
+        - name: TS_ROUTES
+          value: 10.42.0.0/16,10.43.0.0/16
+        image: tailscale/tailscale:latest
+        imagePullPolicy: Always
+        name: tailscale
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      serviceAccountName: tailscale
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tailscale
+  namespace: rebnz
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tailscale
+  namespace: rebnz
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  verbs:
+  - create
+- apiGroups:
+  - ''
+  resourceNames:
+  - tailscale-state
+  resources:
+  - secrets
+  verbs:
+  - get
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tailscale
+  namespace: rebnz
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tailscale
+subjects:
+- kind: ServiceAccount
+  name: tailscale

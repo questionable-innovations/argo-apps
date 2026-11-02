@@ -1,0 +1,47 @@
+# Pre-provisioned PVCs in the `media` namespace, shared by several of the media apps rather
+# than owned by any one of them (plex, sonarr, radarr, tdarr, ... all mount these).
+#
+# `volumeName` is pinned to the PV each claim is already bound to. That is deliberate: it makes
+# these manifests adopt the existing volumes instead of provisioning fresh empty ones. Do not
+# remove it — `media` alone is 80Ti of real data.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+  namespace: media
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 80Ti
+  storageClassName: local-path
+  volumeName: media
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: media
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 24Ti
+  storageClassName: bulk-storage
+  volumeName: pvc-c738344a-ea70-4571-bdda-1d439c0e17ad
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-data
+  namespace: media
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 24Ti
+  storageClassName: local-path
+  volumeName: pvc-local-data

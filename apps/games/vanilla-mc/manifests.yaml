@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vanilla-mc
+  namespace: games
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: vanilla-mc
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: vanilla-mc
+      name: vanilla-mc
+    spec:
+      containers:
+      - env:
+        - name: TYPE
+          value: PAPER
+        - name: TZ
+          value: Pacific/Auckland
+        - name: UID
+          value: '911'
+        - name: USE_AIKAR_FLAGS
+          value: 'true'
+        - name: EULA
+          value: 'true'
+        - name: GID
+          value: '911'
+        - name: MEMORY
+          value: 4G
+        image: itzg/minecraft-server
+        imagePullPolicy: Always
+        name: vanilla-mc
+        volumeMounts:
+        - mountPath: /data
+          name: server-data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: vanilla-mc
+      name: server-data
+      namespace: games
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vanilla-mc
+  namespace: games
+spec:
+  ports:
+  - nodePort: 31116
+    port: 31116
+    targetPort: 25565
+  selector:
+    podinate.com/pod: vanilla-mc
+  type: NodePort

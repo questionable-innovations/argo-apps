@@ -1,0 +1,338 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "5"
+      keel.sh/policy: force
+      keel.sh/pollSchedule: '@every 1m'
+      keel.sh/secrets: ghcr-russell
+      keel.sh/trigger: poll
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"keel.sh/policy":"force","keel.sh/pollSchedule":"@every 1m","keel.sh/secrets":"ghcr-russell","keel.sh/trigger":"poll"},"name":"falderia","namespace":"russell"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"falderia"}},"template":{"metadata":{"labels":{"app":"falderia"}},"spec":{"containers":[{"image":"ghcr.io/russellbloxwich/falderia:latest","imagePullPolicy":"Always","name":"falderia","ports":[{"containerPort":8080,"name":"http"}],"resources":{}}],"imagePullSecrets":[{"name":"ghcr-russell"}],"serviceAccountName":"russell"}}}}
+      kubernetes.io/change-cause: keel automated update, version latest -> master
+        [2026-01-25T02:53:34Z]
+    creationTimestamp: "2026-01-13T17:38:35Z"
+    generation: 6
+    name: falderia
+    namespace: russell
+    resourceVersion: "185441335"
+    uid: cf2e4934-9f78-43a6-aea5-ec04d1f560de
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: falderia
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          keel.sh/update-time: 2026-01-25 02:53:34.595584618 +0000 UTC m=+50.221048051
+        labels:
+          app: falderia
+      spec:
+        containers:
+        - image: ghcr.io/russellbloxwich/falderia:master
+          imagePullPolicy: Always
+          name: falderia
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        imagePullSecrets:
+        - name: ghcr-russell
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: russell
+        serviceAccountName: russell
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-01-13T17:38:35Z"
+      lastUpdateTime: "2026-01-25T02:53:36Z"
+      message: ReplicaSet "falderia-56cb9878b6" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2026-10-20T05:04:07Z"
+      lastUpdateTime: "2026-10-20T05:04:07Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 6
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "26"
+      keel.sh/policy: force
+      keel.sh/pollSchedule: '@every 1m'
+      keel.sh/secrets: ghcr-russell
+      keel.sh/trigger: poll
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"keel.sh/policy":"force","keel.sh/pollSchedule":"@every 1m","keel.sh/secrets":"ghcr-russell","keel.sh/trigger":"poll"},"name":"mcp-servers","namespace":"russell"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"mcp-servers"}},"template":{"metadata":{"labels":{"app":"mcp-servers"}},"spec":{"containers":[{"envFrom":[{"secretRef":{"name":"mcp-servers-env"}}],"image":"ghcr.io/russellbloxwich/mcp-servers:latest","imagePullPolicy":"Always","name":"mcp-servers","ports":[{"containerPort":8080,"name":"http"}],"resources":{}}],"imagePullSecrets":[{"name":"ghcr-russell"}],"serviceAccountName":"russell"}}}}
+      kubernetes.io/change-cause: keel automated update, version latest -> main [2026-01-25T02:53:37Z]
+    creationTimestamp: "2026-01-25T02:27:18Z"
+    generation: 27
+    name: mcp-servers
+    namespace: russell
+    resourceVersion: "185441406"
+    uid: 88395172-7424-460c-b2de-7ed95ea944f1
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: mcp-servers
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        annotations:
+          keel.sh/update-time: 2026-01-25 02:53:37.518141738 +0000 UTC m=+53.143605161
+          kubectl.kubernetes.io/restartedAt: "2026-04-22T14:46:52-06:00"
+        labels:
+          app: mcp-servers
+      spec:
+        containers:
+        - envFrom:
+          - secretRef:
+              name: mcp-servers-env
+          image: ghcr.io/russellbloxwich/mcp-servers:main
+          imagePullPolicy: Always
+          name: mcp-servers
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        imagePullSecrets:
+        - name: ghcr-russell
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: russell
+        serviceAccountName: russell
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-01-25T02:27:18Z"
+      lastUpdateTime: "2026-04-22T20:47:02Z"
+      message: ReplicaSet "mcp-servers-f68f768f8" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2026-10-20T05:04:07Z"
+      lastUpdateTime: "2026-10-20T05:04:07Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 27
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"falderia","namespace":"russell"},"spec":{"ports":[{"port":80,"protocol":"TCP","targetPort":8080}],"selector":{"app":"falderia"},"type":"ClusterIP"}}
+    creationTimestamp: "2026-01-13T17:38:36Z"
+    name: falderia
+    namespace: russell
+    resourceVersion: "118605607"
+    uid: 72e23d1b-4a3e-4c63-b074-2bc9054be0a5
+  spec:
+    clusterIP: 10.43.253.16
+    clusterIPs:
+    - 10.43.253.16
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: falderia
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"mcp-servers","namespace":"russell"},"spec":{"ports":[{"port":80,"protocol":"TCP","targetPort":8080}],"selector":{"app":"mcp-servers"},"type":"ClusterIP"}}
+    creationTimestamp: "2026-01-25T02:27:18Z"
+    name: mcp-servers
+    namespace: russell
+    resourceVersion: "121259600"
+    uid: 04618024-452b-416f-ac70-3d7a4b5eab07
+  spec:
+    clusterIP: 10.43.36.245
+    clusterIPs:
+    - 10.43.36.245
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mcp-servers
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"falderia","namespace":"russell"},"spec":{"ingressClassName":"nginx","rules":[{"host":"falderia.bloflix.com","http":{"paths":[{"backend":{"service":{"name":"falderia","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["falderia.bloflix.com"],"secretName":"falderia-tls"}]}}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2026-01-13T17:38:36Z"
+    generation: 2
+    name: falderia
+    namespace: russell
+    resourceVersion: "185442506"
+    uid: 99739f3d-cd60-4e47-9f3b-1627427e0850
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: falderia.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: falderia
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - falderia.bloflix.com
+      secretName: falderia-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"mcp-servers","namespace":"russell"},"spec":{"ingressClassName":"nginx","rules":[{"host":"mcp.bloflix.com","http":{"paths":[{"backend":{"service":{"name":"mcp-servers","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["mcp.bloflix.com"],"secretName":"mcp-servers-tls"}]}}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2026-01-25T02:27:19Z"
+    generation: 1
+    name: mcp-servers
+    namespace: russell
+    resourceVersion: "185442491"
+    uid: 5d623075-0677-4a11-a38b-90d0d4988ef2
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: mcp.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: mcp-servers
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - mcp.bloflix.com
+      secretName: mcp-servers-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIBdjCCAR2gAwIBAgIBADAKBggqhkjOPQQDAjAjMSEwHwYDVQQDDBhrM3Mtc2Vy
+      dmVyLWNhQDE3MjIwNzk1OTEwHhcNMjQwNzI3MTEyNjMxWhcNMzQwNzI1MTEyNjMx
+      WjAjMSEwHwYDVQQDDBhrM3Mtc2VydmVyLWNhQDE3MjIwNzk1OTEwWTATBgcqhkjO
+      PQIBBggqhkjOPQMBBwNCAARHVzM4NeiJe6D/4k6YHDMY0UlwGSkXrf6/IlDgXG+m
+      FKfEmC9LFcnGoeGBHGYs75JEX5gBvEcQ29LajM4xzuleo0IwQDAOBgNVHQ8BAf8E
+      BAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUYTYcMhMi25g83Ai0tkDR
+      2v4ywvMwCgYIKoZIzj0EAwIDRwAwRAIgHOnePfdnaP4S3KpojdcGKlWQsDFPYwEv
+      9bPRIfqs6cECIHLvGORVz57RhD7pVnuB8D+YZaol6tVQlRwYvqLxoZiJ
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2026-01-13T17:24:12Z"
+    name: kube-root-ca.crt
+    namespace: russell
+    resourceVersion: "118600849"
+    uid: a254284a-b0b3-40e9-8590-315d1716371c
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: "2026-01-13T17:24:12Z"
+    name: default
+    namespace: russell
+    resourceVersion: "118600850"
+    uid: a74f7fe3-6f0e-4bf3-8369-5ac05c9b364e
+- apiVersion: v1
+  imagePullSecrets:
+  - name: ghcr-russell
+  kind: ServiceAccount
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","imagePullSecrets":[{"name":"ghcr-russell"}],"kind":"ServiceAccount","metadata":{"annotations":{},"name":"russell","namespace":"russell"}}
+    creationTimestamp: "2026-01-13T17:25:41Z"
+    name: russell
+    namespace: russell
+    resourceVersion: "118601093"
+    uid: 50e83c4f-a512-40f9-917b-4a15d2098fdc
+kind: List
+metadata:
+  resourceVersion: ""

@@ -1,0 +1,24 @@
+# Group root for apps/infra. Syncs only the Application manifests sitting directly in that
+# directory (recurse=false) — the per-app manifest subdirectories are owned by those Applications.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: bootstrap
+  source:
+    repoURL: https://github.com/LaSpruca/argo-apps.git
+    targetRevision: main
+    path: apps/infra
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,27 @@
+# Shared cluster resources that no single app owns: namespaces, the ACME ClusterIssuer, the
+# pre-provisioned media PVCs, the ingress-nginx LoadBalancer Service.
+#
+# recurse=false keeps static/manifests/reference/ (verbatim cluster dumps, kept for diffing only)
+# out of the sync.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: static
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  source:
+    repoURL: https://github.com/LaSpruca/argo-apps.git
+    targetRevision: main
+    path: static/manifests
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    # Off until reviewed — these PVCs are bound to 80Ti/24Ti of real data.
+    syncOptions:
+      - ServerSideApply=true

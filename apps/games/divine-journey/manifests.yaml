@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: divine-journey
+  namespace: games
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: divine-journey
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: divine-journey
+      name: divine-journey
+    spec:
+      containers:
+      - env:
+        - name: SPAWN_PROTECTION
+          value: '0'
+        - name: ALLOW_FLIGHT
+          value: 'true'
+        - name: CF_SLUG
+          value: divine-journey-2
+        - name: CF_FILENAME_MATCHER
+          value: 2.23.4
+        - name: CF_FORCE_INCLUDE_MODS
+          value: hwyla
+        - name: CF_API_KEY
+          value: $2a$10$dS5nV7U4zYzrHQBnwL6BGuHXdN4TeBeYK5cTUEPWx/QfZTLmAJTyK
+        - name: UID
+          value: '911'
+        - name: USE_AIKAR_FLAGS
+          value: 'true'
+        - name: EULA
+          value: 'true'
+        - name: GID
+          value: '911'
+        - name: MEMORY
+          value: 8G
+        - name: TYPE
+          value: AUTO_CURSEFORGE
+        - name: TZ
+          value: Pacific/Auckland
+        - name: JVM_OPTS
+          value: -Dfml.queryResult=confirm
+        image: itzg/minecraft-server:java8
+        imagePullPolicy: Always
+        name: divine-journey
+        volumeMounts:
+        - mountPath: /data
+          name: server-data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: divine-journey
+      name: server-data
+      namespace: games
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: divine-journey
+  namespace: games
+spec:
+  ports:
+  - nodePort: 31117
+    port: 31117
+    targetPort: 25565
+  selector:
+    podinate.com/pod: divine-journey
+  type: NodePort

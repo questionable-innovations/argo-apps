@@ -1,0 +1,2745 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"creationTimestamp":null,"name":"cleanuparr","namespace":"media"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"cleanuparr"}},"serviceName":"","template":{"metadata":{"creationTimestamp":null,"labels":{"podinate.com/pod":"cleanuparr"},"name":"cleanuparr"},"spec":{"containers":[{"env":[{"name":"PGID","value":"911"},{"name":"PUID","value":"911"},{"name":"TZ","value":"Pacific/Auckland"}],"image":"ghcr.io/cleanuparr/cleanuparr:2","name":"cleanuparr","ports":[{"containerPort":11011,"name":"cleanuparr"}],"resources":{},"volumeMounts":[{"mountPath":"/config","name":"config"}]}]}},"updateStrategy":{},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"creationTimestamp":null,"labels":{"podinate.com/pod":"cleanuparr"},"name":"config","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":"app-data","volumeMode":"Filesystem"},"status":{}}]},"status":{"availableReplicas":0,"replicas":0}}
+    creationTimestamp: "2026-02-28T02:13:27Z"
+    generation: 2
+    name: cleanuparr
+    namespace: media
+    resourceVersion: "182384516"
+    uid: b0ad508a-ef7c-42b4-a3f1-ba23336d6621
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: cleanuparr
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-05-09T16:57:42+12:00"
+        labels:
+          podinate.com/pod: cleanuparr
+        name: cleanuparr
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: ghcr.io/cleanuparr/cleanuparr:2
+          imagePullPolicy: IfNotPresent
+          name: cleanuparr
+          ports:
+          - containerPort: 11011
+            name: cleanuparr
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: cleanuparr
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: cleanuparr-75bfbdb479
+    observedGeneration: 2
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: cleanuparr-75bfbdb479
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-07-30T00:57:53Z"
+    generation: 7
+    name: nzbget
+    namespace: media
+    resourceVersion: "182384537"
+    uid: 68612402-1b04-4176-8f68-1f3aa05a163b
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: nzbget
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-05-09T16:58:34+12:00"
+        labels:
+          podinate.com/pod: nzbget
+        name: nzbget
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: lscr.io/linuxserver/nzbget
+          imagePullPolicy: Always
+          name: nzbget
+          ports:
+          - containerPort: 6789
+            name: nzbget
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+          - mountPath: /data
+            name: media
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: nzbget
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 128Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: nzbget-cf9b6fc8b
+    observedGeneration: 7
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: nzbget-cf9b6fc8b
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"creationTimestamp":null,"name":"overseerr","namespace":"media"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"overseerr"}},"serviceName":"","template":{"metadata":{"creationTimestamp":null,"labels":{"podinate.com/pod":"overseerr"},"name":"overseerr"},"spec":{"containers":[{"env":[{"name":"TZ","value":"Pacific/Auckland"}],"image":"ghcr.io/seerr-team/seerr:latest","livenessProbe":{"failureThreshold":5,"httpGet":{"path":"/api/v1/status","port":5055},"initialDelaySeconds":60,"periodSeconds":30},"name":"overseerr","ports":[{"containerPort":5055,"name":"overseerr"}],"readinessProbe":{"httpGet":{"path":"/api/v1/status","port":5055},"initialDelaySeconds":30,"periodSeconds":10},"resources":{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}},"securityContext":{"allowPrivilegeEscalation":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"volumeMounts":[{"mountPath":"/app/config","name":"config"}]}],"securityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}}},"updateStrategy":{},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"creationTimestamp":null,"labels":{"podinate.com/pod":"overseerr"},"name":"config","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":"app-data","volumeMode":"Filesystem"},"status":{}}]},"status":{"availableReplicas":0,"replicas":0}}
+    creationTimestamp: "2024-07-30T00:33:30Z"
+    generation: 11
+    name: overseerr
+    namespace: media
+    resourceVersion: "185442717"
+    uid: 33269e3e-c47f-4874-9f3b-60bce4bf215f
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: overseerr
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-05-09T16:55:27+12:00"
+        labels:
+          podinate.com/pod: overseerr
+        name: overseerr
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: ghcr.io/seerr-team/seerr:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /api/v1/status
+              port: 5055
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: overseerr
+          ports:
+          - containerPort: 5055
+            name: overseerr
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/status
+              port: 5055
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /app/config
+            name: config
+          - mountPath: /config
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: overseerr
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: overseerr-9545cbd76
+    observedGeneration: 11
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: overseerr-9545cbd76
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"name":"plex","namespace":"media"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"plex"}},"serviceName":"","template":{"metadata":{"labels":{"podinate.com/pod":"plex"},"name":"plex"},"spec":{"containers":[{"env":[{"name":"PGID","value":"911"},{"name":"PLEX_CLAIM","value":"claim-NJsdWGTekAapEu38tmN3"},{"name":"PUID","value":"911"},{"name":"TZ","value":"Pacific/Auckland"},{"name":"NVIDIA_DRIVER_CAPABILITIES","value":"compute,utility,video"},{"name":"NVIDIA_VISIBLE_DEVICES","value":"all"}],"image":"lscr.io/linuxserver/plex","imagePullPolicy":"Always","name":"plex","ports":[{"containerPort":32400,"name":"plex","protocol":"TCP"}],"resources":{"limits":{"cpu":"6","memory":"8Gi","nvidia.com/gpu":"1"},"requests":{"cpu":"2","memory":"2Gi","nvidia.com/gpu":"1"}},"volumeMounts":[{"mountPath":"/config","name":"config"},{"mountPath":"/data","name":"data"}]}],"runtimeClassName":"nvidia","volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"media"}}]}},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"labels":{"podinate.com/pod":"plex"},"name":"config","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"128Gi"}},"storageClassName":"local-path","volumeMode":"Filesystem"}}]}}
+    creationTimestamp: "2026-05-15T04:58:51Z"
+    generation: 6
+    name: plex
+    namespace: media
+    resourceVersion: "185442219"
+    uid: c89579fa-0a20-4fa6-95bc-5f230bb2e7d7
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: plex
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: plex
+        name: plex
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PLEX_CLAIM
+            value: claim-NJsdWGTekAapEu38tmN3
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          - name: NVIDIA_DRIVER_CAPABILITIES
+            value: compute,utility,video
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: all
+          image: lscr.io/linuxserver/plex
+          imagePullPolicy: Always
+          name: plex
+          ports:
+          - containerPort: 32400
+            name: plex
+            protocol: TCP
+          resources:
+            limits:
+              cpu: "6"
+              memory: 8Gi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: "2"
+              memory: 2Gi
+              nvidia.com/gpu: "1"
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        runtimeClassName: nvidia
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: plex
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 128Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 0
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: plex-ccd576ccd
+    observedGeneration: 6
+    replicas: 1
+    updateRevision: plex-ccd576ccd
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-07-29T01:22:27Z"
+    generation: 5
+    name: prowlarr
+    namespace: media
+    resourceVersion: "182384716"
+    uid: 4677c84c-74a4-49fb-a093-faa242056800
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: prowlarr
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-05-09T16:59:30+12:00"
+        labels:
+          podinate.com/pod: prowlarr
+        name: prowlarr
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: lscr.io/linuxserver/prowlarr
+          imagePullPolicy: Always
+          name: prowlarr
+          ports:
+          - containerPort: 9696
+            name: prowlarr
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: prowlarr
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: prowlarr-6797f6b8bd
+    observedGeneration: 5
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: prowlarr-6797f6b8bd
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-07-29T03:15:56Z"
+    generation: 9
+    name: qbittorrent
+    namespace: media
+    resourceVersion: "182384712"
+    uid: 5f182433-0622-4836-8d76-ca585b8da603
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: qbittorrent
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-05-09T17:00:07+12:00"
+        labels:
+          podinate.com/pod: qbittorrent
+        name: qbittorrent
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: lscr.io/linuxserver/qbittorrent
+          imagePullPolicy: Always
+          name: qbittorrent
+          ports:
+          - containerPort: 8080
+            name: qbittorrent
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+          - mountPath: /data
+            name: media
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: qbittorrent
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: qbittorrent-bbdfbc556
+    observedGeneration: 9
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: qbittorrent-bbdfbc556
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-07-29T02:30:02Z"
+    generation: 10
+    name: radarr
+    namespace: media
+    resourceVersion: "182384644"
+    uid: bb10834e-ce1a-4f70-bcb5-8adbc3fdf841
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: radarr
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-07-09T22:55:37+12:00"
+        labels:
+          podinate.com/pod: radarr
+        name: radarr
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: lscr.io/linuxserver/radarr
+          imagePullPolicy: Always
+          name: radarr
+          ports:
+          - containerPort: 7878
+            name: radarr
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+          - mountPath: /data
+            name: media
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: radarr
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: radarr-58668f7749
+    observedGeneration: 10
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: radarr-58668f7749
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-10-22T00:01:31Z"
+    generation: 7
+    name: sonarr
+    namespace: media
+    resourceVersion: "182383957"
+    uid: 74551bfd-5be1-4c83-a209-ae38385d9d61
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: sonarr
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-07-09T22:55:37+12:00"
+        labels:
+          podinate.com/pod: sonarr
+        name: sonarr
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: lscr.io/linuxserver/sonarr
+          imagePullPolicy: Always
+          name: sonarr
+          ports:
+          - containerPort: 8989
+            name: sonarr
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: local-config
+          - mountPath: /data
+            name: media
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: sonarr
+        name: local-config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: sonarr-656987cf66
+    observedGeneration: 7
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: sonarr-656987cf66
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"creationTimestamp":null,"name":"storyteller","namespace":"media"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"storyteller"}},"serviceName":"","template":{"metadata":{"creationTimestamp":null,"labels":{"podinate.com/pod":"storyteller"},"name":"storyteller"},"spec":{"containers":[{"env":[{"name":"TZ","value":"Pacific/Auckland"},{"name":"PUID","value":"1000"},{"name":"PGID","value":"1000"},{"name":"NODE_OPTIONS","value":"--max-old-space-size=4096"},{"name":"STORYTELLER_SECRET_KEY","valueFrom":{"secretKeyRef":{"key":"STORYTELLER_SECRET_KEY","name":"storyteller-secret"}}}],"image":"registry.gitlab.com/storyteller-platform/storyteller:latest","livenessProbe":{"failureThreshold":5,"initialDelaySeconds":60,"periodSeconds":30,"tcpSocket":{"port":8001}},"name":"storyteller","ports":[{"containerPort":8001,"name":"http"}],"readinessProbe":{"initialDelaySeconds":20,"periodSeconds":10,"tcpSocket":{"port":8001}},"resources":{"limits":{"cpu":"4","memory":"6Gi"},"requests":{"cpu":"250m","memory":"1Gi"}},"volumeMounts":[{"mountPath":"/data","name":"data"}]}],"securityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"}}},"updateStrategy":{},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"creationTimestamp":null,"labels":{"podinate.com/pod":"storyteller"},"name":"data","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"50Gi"}},"storageClassName":"app-data","volumeMode":"Filesystem"},"status":{}}]},"status":{"availableReplicas":0,"replicas":0}}
+    creationTimestamp: "2026-06-05T05:59:17Z"
+    generation: 2
+    name: storyteller
+    namespace: media
+    resourceVersion: "185442483"
+    uid: 91ee3e57-cd7d-430e-9408-4f9c858fdc5e
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: storyteller
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: storyteller
+        name: storyteller
+      spec:
+        containers:
+        - env:
+          - name: TZ
+            value: Pacific/Auckland
+          - name: PUID
+            value: "1000"
+          - name: PGID
+            value: "1000"
+          - name: NODE_OPTIONS
+            value: --max-old-space-size=4096
+          - name: STORYTELLER_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                key: STORYTELLER_SECRET_KEY
+                name: storyteller-secret
+          image: registry.gitlab.com/storyteller-platform/storyteller:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            tcpSocket:
+              port: 8001
+            timeoutSeconds: 1
+          name: storyteller
+          ports:
+          - containerPort: 8001
+            name: http
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8001
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: "4"
+              memory: 6Gi
+            requests:
+              cpu: 250m
+              memory: 1Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: storyteller
+        name: data
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: storyteller-55ddfcbf6d
+    observedGeneration: 2
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: storyteller-55ddfcbf6d
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-07-29T03:36:48Z"
+    generation: 8
+    name: tautulli
+    namespace: media
+    resourceVersion: "182384558"
+    uid: 78d53b6b-5cb2-4bdf-9782-a097b6cf1ed6
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: tautulli
+    serviceName: ""
+    template:
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/restartedAt: "2026-05-09T17:02:41+12:00"
+        labels:
+          podinate.com/pod: tautulli
+        name: tautulli
+      spec:
+        containers:
+        - env:
+          - name: TZ
+            value: Pacific/Auckland
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          image: lscr.io/linuxserver/tautulli
+          imagePullPolicy: Always
+          name: tautulli
+          ports:
+          - containerPort: 8181
+            name: tautulli
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: tautulli
+        name: config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: tautulli-857c6dfdf8
+    observedGeneration: 8
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: tautulli-857c6dfdf8
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"name":"tdarr","namespace":"media"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"tdarr"}},"serviceName":"","template":{"metadata":{"labels":{"podinate.com/pod":"tdarr"},"name":"tdarr"},"spec":{"containers":[{"env":[{"name":"inContainer","value":"true"},{"name":"internalNode","value":"false"},{"name":"PGID","value":"911"},{"name":"PUID","value":"911"},{"name":"TZ","value":"Pacific/Auckland"}],"image":"haveagitgat/tdarr:2.71.01","livenessProbe":{"failureThreshold":5,"periodSeconds":60,"tcpSocket":{"port":8265},"timeoutSeconds":5},"name":"tdarr","ports":[{"containerPort":8265,"name":"tdarr-ui"},{"containerPort":8266,"name":"tdarr-server"}],"readinessProbe":{"periodSeconds":30,"tcpSocket":{"port":8265},"timeoutSeconds":3},"resources":{"limits":{"cpu":"4","memory":"24Gi"},"requests":{"cpu":"500m","memory":"2Gi"}},"startupProbe":{"failureThreshold":60,"initialDelaySeconds":10,"periodSeconds":10,"tcpSocket":{"port":8265}},"volumeMounts":[{"mountPath":"/app/server","name":"local-config","subPath":"server"},{"mountPath":"/app/configs","name":"local-config","subPath":"configs"},{"mountPath":"/app/logs","name":"local-config","subPath":"logs"},{"mountPath":"/data","name":"data"}]}],"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"media"}}]}},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"labels":{"podinate.com/pod":"tdarr"},"name":"local-config","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"5Gi"}},"storageClassName":"local-path","volumeMode":"Filesystem"}}]}}
+    creationTimestamp: "2026-05-09T05:48:07Z"
+    generation: 6
+    name: tdarr
+    namespace: media
+    resourceVersion: "185441992"
+    uid: 9f18d1b0-f4da-4b8f-8c4b-cd8bd09e1df2
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: tdarr
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: tdarr
+        name: tdarr
+      spec:
+        containers:
+        - env:
+          - name: inContainer
+            value: "true"
+          - name: internalNode
+            value: "false"
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: haveagitgat/tdarr:2.71.01
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            periodSeconds: 60
+            successThreshold: 1
+            tcpSocket:
+              port: 8265
+            timeoutSeconds: 5
+          name: tdarr
+          ports:
+          - containerPort: 8265
+            name: tdarr-ui
+            protocol: TCP
+          - containerPort: 8266
+            name: tdarr-server
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            periodSeconds: 30
+            successThreshold: 1
+            tcpSocket:
+              port: 8265
+            timeoutSeconds: 3
+          resources:
+            limits:
+              cpu: "4"
+              memory: 24Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+          startupProbe:
+            failureThreshold: 60
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8265
+            timeoutSeconds: 1
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /app/server
+            name: local-config
+            subPath: server
+          - mountPath: /app/configs
+            name: local-config
+            subPath: configs
+          - mountPath: /app/logs
+            name: local-config
+            subPath: logs
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: tdarr
+        name: local-config
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: tdarr-68c574d584
+    observedGeneration: 6
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: tdarr-68c574d584
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"name":"tdarr-node","namespace":"media"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"tdarr-node"}},"serviceName":"","template":{"metadata":{"labels":{"podinate.com/pod":"tdarr-node"},"name":"tdarr-node"},"spec":{"containers":[{"env":[{"name":"inContainer","value":"true"},{"name":"nodeName","value":"k3s-gpu-node"},{"name":"serverIP","value":"tdarr.media.svc.cluster.local"},{"name":"serverPort","value":"8266"},{"name":"NVIDIA_DRIVER_CAPABILITIES","value":"compute,utility,video"},{"name":"NVIDIA_VISIBLE_DEVICES","value":"all"},{"name":"PGID","value":"911"},{"name":"PUID","value":"911"},{"name":"TZ","value":"Pacific/Auckland"}],"image":"haveagitgat/tdarr_node:2.71.01","livenessProbe":{"exec":{"command":["sh","-c","pgrep -f Tdarr_Node \u003e /dev/null"]},"failureThreshold":3,"initialDelaySeconds":60,"periodSeconds":60},"name":"tdarr-node","resources":{"limits":{"cpu":"8","memory":"16Gi","nvidia.com/gpu":"1"},"requests":{"cpu":"4","memory":"4Gi","nvidia.com/gpu":"1"}},"volumeMounts":[{"mountPath":"/temp","name":"tdarr-temp"},{"mountPath":"/data","name":"data"}]}],"initContainers":[{"command":["sh","-c","echo \"pruning workdirs older than 24h...\"\nfind /temp -mindepth 1 -maxdepth 1 -type d -name 'tdarr-workDir2-*' -mtime +1 -exec rm -rf {} + 2\u003e/dev/null || true\nremaining=$(ls -d /temp/tdarr-workDir2-* 2\u003e/dev/null | wc -l)\necho \"prune complete; remaining workdirs: $remaining\"\n"],"image":"busybox:1.36","name":"prune-old-workdirs","volumeMounts":[{"mountPath":"/temp","name":"tdarr-temp"}]}],"runtimeClassName":"nvidia","volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"media"}}]}},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"labels":{"podinate.com/pod":"tdarr-node"},"name":"tdarr-temp","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"200Gi"}},"storageClassName":"local-path","volumeMode":"Filesystem"}}]}}
+    creationTimestamp: "2026-05-09T05:48:09Z"
+    generation: 42
+    name: tdarr-node
+    namespace: media
+    resourceVersion: "184771986"
+    uid: c5bd2e85-a4e4-4e62-969c-339632e0fcf7
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 0
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: tdarr-node
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: tdarr-node
+        name: tdarr-node
+      spec:
+        containers:
+        - env:
+          - name: inContainer
+            value: "true"
+          - name: nodeName
+            value: k3s-gpu-node
+          - name: serverIP
+            value: tdarr.media.svc.cluster.local
+          - name: serverPort
+            value: "8266"
+          - name: NVIDIA_DRIVER_CAPABILITIES
+            value: compute,utility,video
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: all
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: haveagitgat/tdarr_node:2.71.01
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - pgrep -f Tdarr_Node > /dev/null
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: tdarr-node
+          resources:
+            limits:
+              cpu: "8"
+              memory: 16Gi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: "4"
+              memory: 4Gi
+              nvidia.com/gpu: "1"
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /temp
+            name: tdarr-temp
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - sh
+          - -c
+          - |
+            echo "pruning workdirs older than 24h..."
+            find /temp -mindepth 1 -maxdepth 1 -type d -name 'tdarr-workDir2-*' -mtime +1 -exec rm -rf {} + 2>/dev/null || true
+            remaining=$(ls -d /temp/tdarr-workDir2-* 2>/dev/null | wc -l)
+            echo "prune complete; remaining workdirs: $remaining"
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          name: prune-old-workdirs
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /temp
+            name: tdarr-temp
+        restartPolicy: Always
+        runtimeClassName: nvidia
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: media
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: tdarr-node
+        name: tdarr-temp
+        namespace: media
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 0
+    collisionCount: 0
+    currentRevision: tdarr-node-dc4c569fc
+    observedGeneration: 42
+    replicas: 0
+    updateRevision: tdarr-node-dc4c569fc
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"creationTimestamp":null,"name":"cleanuparr","namespace":"media"},"spec":{"ports":[{"port":11011,"protocol":"TCP","targetPort":11011}],"selector":{"podinate.com/pod":"cleanuparr"},"type":"ClusterIP"},"status":{"loadBalancer":{}}}
+    creationTimestamp: "2026-02-28T02:13:27Z"
+    name: cleanuparr
+    namespace: media
+    resourceVersion: "128786767"
+    uid: 1e8f3124-1566-4068-b3d4-994e3eb4cea4
+  spec:
+    clusterIP: 10.43.191.121
+    clusterIPs:
+    - 10.43.191.121
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 11011
+      protocol: TCP
+      targetPort: 11011
+    selector:
+      podinate.com/pod: cleanuparr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-29T00:22:35Z"
+    name: nzbget
+    namespace: media
+    resourceVersion: "246122"
+    uid: d7f9b278-7646-4109-a2ed-2a8ce4146f27
+  spec:
+    clusterIP: 10.43.202.186
+    clusterIPs:
+    - 10.43.202.186
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 6789
+      protocol: TCP
+      targetPort: 6789
+    selector:
+      podinate.com/pod: nzbget
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"creationTimestamp":null,"name":"overseerr","namespace":"media"},"spec":{"ports":[{"port":5055,"protocol":"TCP","targetPort":5055}],"selector":{"podinate.com/pod":"overseerr"},"type":"ClusterIP"},"status":{"loadBalancer":{}}}
+    creationTimestamp: "2024-07-30T00:33:30Z"
+    name: overseerr
+    namespace: media
+    resourceVersion: "128568095"
+    uid: 7180fee8-813a-4311-930e-415e4f62eb97
+  spec:
+    clusterIP: 10.43.187.80
+    clusterIPs:
+    - 10.43.187.80
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 5055
+      protocol: TCP
+      targetPort: 5055
+    selector:
+      podinate.com/pod: overseerr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-05-04T11:13:59Z"
+    name: plex
+    namespace: media
+    resourceVersion: "59988376"
+    uid: 26578903-c087-4ec8-a28c-dc1cd09e63a9
+  spec:
+    clusterIP: 10.43.254.4
+    clusterIPs:
+    - 10.43.254.4
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 32400
+      protocol: TCP
+      targetPort: 32400
+    selector:
+      podinate.com/pod: plex
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-31T06:57:35Z"
+    labels:
+      apps.kubernetes.io/pod-index: "0"
+      controller-revision-hash: plex-cdb59b65f
+      podinate.com/pod: plex
+      statefulset.kubernetes.io/pod-name: plex-0
+    name: plex-0
+    namespace: media
+    resourceVersion: "693615"
+    uid: 44a5985d-662f-434e-b74d-9b329fd1abcc
+  spec:
+    clusterIP: 10.43.250.53
+    clusterIPs:
+    - 10.43.250.53
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 32400
+      port: 32400
+      protocol: TCP
+      targetPort: 32400
+    selector:
+      podinate.com/pod: plex
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-29T01:22:27Z"
+    name: prowlarr
+    namespace: media
+    resourceVersion: "253175"
+    uid: fff6e826-b728-4982-85d0-6a0d026368be
+  spec:
+    clusterIP: 10.43.97.48
+    clusterIPs:
+    - 10.43.97.48
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 9696
+      protocol: TCP
+      targetPort: 9696
+    selector:
+      podinate.com/pod: prowlarr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-29T03:15:56Z"
+    name: qbittorrent
+    namespace: media
+    resourceVersion: "266528"
+    uid: a806461d-2cc9-45e0-9820-5dd3b666c6dc
+  spec:
+    clusterIP: 10.43.138.56
+    clusterIPs:
+    - 10.43.138.56
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      podinate.com/pod: qbittorrent
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-29T02:30:02Z"
+    name: radarr
+    namespace: media
+    resourceVersion: "261171"
+    uid: 909b2338-5f03-4248-8de1-92e56425441b
+  spec:
+    clusterIP: 10.43.27.231
+    clusterIPs:
+    - 10.43.27.231
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 7878
+      protocol: TCP
+      targetPort: 7878
+    selector:
+      podinate.com/pod: radarr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-27T21:51:44Z"
+    name: sonarr
+    namespace: media
+    resourceVersion: "15337727"
+    uid: e4155e2f-9164-4bb2-a732-c2ddf3098d89
+  spec:
+    clusterIP: 10.43.104.149
+    clusterIPs:
+    - 10.43.104.149
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8989
+      protocol: TCP
+      targetPort: 8989
+    selector:
+      podinate.com/pod: sonarr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"creationTimestamp":null,"name":"storyteller","namespace":"media"},"spec":{"ports":[{"port":8001,"protocol":"TCP","targetPort":8001}],"selector":{"podinate.com/pod":"storyteller"},"type":"ClusterIP"},"status":{"loadBalancer":{}}}
+    creationTimestamp: "2026-06-05T05:59:18Z"
+    name: storyteller
+    namespace: media
+    resourceVersion: "151408683"
+    uid: bab607c3-1a2e-4bbd-8e3f-d84cbd87f0af
+  spec:
+    clusterIP: 10.43.217.221
+    clusterIPs:
+    - 10.43.217.221
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8001
+      protocol: TCP
+      targetPort: 8001
+    selector:
+      podinate.com/pod: storyteller
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-07-29T03:36:47Z"
+    name: tautulli
+    namespace: media
+    resourceVersion: "431399"
+    uid: 7f764865-dea8-4365-bcff-238a47976527
+  spec:
+    clusterIP: 10.43.239.132
+    clusterIPs:
+    - 10.43.239.132
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8181
+    selector:
+      podinate.com/pod: tautulli
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"tdarr","namespace":"media"},"spec":{"ports":[{"name":"tdarr","port":8265,"protocol":"TCP","targetPort":8265},{"name":"server","port":8266,"protocol":"TCP","targetPort":8266}],"selector":{"podinate.com/pod":"tdarr"},"type":"ClusterIP"}}
+    creationTimestamp: "2024-11-27T10:58:02Z"
+    name: tdarr
+    namespace: media
+    resourceVersion: "145106518"
+    uid: 5322cdcb-448a-42c7-8335-fecb50e74af2
+  spec:
+    clusterIP: 10.43.62.124
+    clusterIPs:
+    - 10.43.62.124
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: tdarr
+      port: 8265
+      protocol: TCP
+      targetPort: 8265
+    - name: server
+      port: 8266
+      protocol: TCP
+      targetPort: 8266
+    selector:
+      podinate.com/pod: tdarr
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true","nginx.ingress.kubernetes.io/whitelist-source-range":"192.168.0.0/16"},"creationTimestamp":null,"labels":{"podinate.com/pod":"cleanuparr"},"name":"cleanuparr","namespace":"media"},"spec":{"ingressClassName":"nginx","rules":[{"host":"cleanuparr.bloflix.com","http":{"paths":[{"backend":{"service":{"name":"cleanuparr","port":{"number":11011}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["cleanuparr.bloflix.com"],"secretName":"cleanuparr-tls"}]},"status":{"loadBalancer":{}}}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2026-02-28T02:13:28Z"
+    generation: 1
+    labels:
+      podinate.com/pod: cleanuparr
+    name: cleanuparr
+    namespace: media
+    resourceVersion: "185442485"
+    uid: d9bb5f07-4570-488d-95f5-a4b1b3f25b8e
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: cleanuparr.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: cleanuparr
+              port:
+                number: 11011
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - cleanuparr.bloflix.com
+      secretName: cleanuparr-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-07-31T04:52:30Z"
+    generation: 2
+    labels:
+      podinate.com/pod: nzbget
+    name: nzbget
+    namespace: media
+    resourceVersion: "185442516"
+    uid: 61970e4a-65ec-42d5-8662-4b96c1c7af49
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: nzbget.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: nzbget
+              port:
+                number: 6789
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - nzbget.bloflix.com
+      secretName: nzbget-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"creationTimestamp":null,"labels":{"podinate.com/pod":"overseerr"},"name":"overseerr","namespace":"media"},"spec":{"ingressClassName":"nginx","rules":[{"host":"overseerr.bloflix.com","http":{"paths":[{"backend":{"service":{"name":"overseerr","port":{"number":5055}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["overseerr.bloflix.com"],"secretName":"overseerr-tls"}]},"status":{"loadBalancer":{}}}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2024-07-30T00:33:30Z"
+    generation: 3
+    labels:
+      podinate.com/pod: overseerr
+    name: overseerr
+    namespace: media
+    resourceVersion: "185442489"
+    uid: b5fa7364-7bfd-40ed-b7e1-71bca9a2be82
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: overseerr.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: overseerr
+              port:
+                number: 5055
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - overseerr.bloflix.com
+      secretName: overseerr-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    creationTimestamp: "2025-05-04T11:14:00Z"
+    generation: 1
+    labels:
+      podinate.com/pod: plex
+    name: plex
+    namespace: media
+    resourceVersion: "185442495"
+    uid: 2820de95-c6bc-4fe0-8d8c-2e5c8d3519f5
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: plex.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: plex
+              port:
+                number: 32400
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-07-31T04:52:35Z"
+    generation: 2
+    labels:
+      podinate.com/pod: prowlarr
+    name: prowlarr
+    namespace: media
+    resourceVersion: "185442518"
+    uid: db9da0c0-9be6-4766-b04b-bd869c29c7f0
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: prowlarr.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: prowlarr
+              port:
+                number: 9696
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - prowlarr.bloflix.com
+      secretName: prowlarr-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-07-31T04:52:53Z"
+    generation: 2
+    labels:
+      podinate.com/pod: qbittorrent
+    name: qbittorrent
+    namespace: media
+    resourceVersion: "185442520"
+    uid: 843ad28d-3826-4989-837c-5a38953b6fdf
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: qbittorrent.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: qbittorrent
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - qbittorrent.bloflix.com
+      secretName: qbittorrent-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-07-31T04:53:02Z"
+    generation: 3
+    labels:
+      podinate.com/pod: radarr
+    name: radarr
+    namespace: media
+    resourceVersion: "185442522"
+    uid: ea46627e-0c4a-486c-9b68-def7d8144c29
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: radarr.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: radarr
+              port:
+                number: 7878
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - radarr.bloflix.com
+      secretName: radarr-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-07-31T04:53:25Z"
+    generation: 4
+    labels:
+      podinate.com/pod: sonarr
+    name: sonarr
+    namespace: media
+    resourceVersion: "185442525"
+    uid: 87bfb3d2-77ec-4890-ac49-615bf2ef2455
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: sonarr.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: sonarr
+              port:
+                number: 8989
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - sonarr.bloflix.com
+      secretName: sonarr-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/proxy-body-size":"0","nginx.ingress.kubernetes.io/proxy-connect-timeout":"75","nginx.ingress.kubernetes.io/proxy-read-timeout":"300","nginx.ingress.kubernetes.io/proxy-send-timeout":"300","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"creationTimestamp":null,"labels":{"podinate.com/pod":"storyteller"},"name":"storyteller","namespace":"media"},"spec":{"ingressClassName":"nginx","rules":[{"host":"storyteller.bloflix.com","http":{"paths":[{"backend":{"service":{"name":"storyteller","port":{"number":8001}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["storyteller.bloflix.com"],"secretName":"storyteller-tls"}]},"status":{"loadBalancer":{}}}
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "75"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2026-06-05T05:59:18Z"
+    generation: 1
+    labels:
+      podinate.com/pod: storyteller
+    name: storyteller
+    namespace: media
+    resourceVersion: "185442501"
+    uid: 6463349c-f301-4231-94d0-a0c86ab0bbde
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: storyteller.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: storyteller
+              port:
+                number: 8001
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - storyteller.bloflix.com
+      secretName: storyteller-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-07-30T02:26:42Z"
+    generation: 7
+    labels:
+      podinate.com/pod: tautulli
+    name: tautulli
+    namespace: media
+    resourceVersion: "185442504"
+    uid: 0c0e034b-5483-4e08-a7e7-83e60578cc3c
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: tautulli.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: tautulli
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - tautulli.bloflix.com
+      secretName: tautulli-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true","nginx.ingress.kubernetes.io/whitelist-source-range":"192.168.0.0/16"},"labels":{"podinate.com/pod":"tdarr"},"name":"tdarr","namespace":"media"},"spec":{"ingressClassName":"nginx","rules":[{"host":"tdarr.bloflix.com","http":{"paths":[{"backend":{"service":{"name":"tdarr","port":{"number":8265}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["tdarr.bloflix.com"],"secretName":"tdarr-tls"}]}}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-11-27T10:58:02Z"
+    generation: 1
+    labels:
+      podinate.com/pod: tdarr
+    name: tdarr
+    namespace: media
+    resourceVersion: "185442487"
+    uid: 56f60a14-eada-4604-8df9-c89454095869
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: tdarr.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: tdarr
+              port:
+                number: 8265
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - tdarr.bloflix.com
+      secretName: tdarr-tls
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIBdjCCAR2gAwIBAgIBADAKBggqhkjOPQQDAjAjMSEwHwYDVQQDDBhrM3Mtc2Vy
+      dmVyLWNhQDE3MjIwNzk1OTEwHhcNMjQwNzI3MTEyNjMxWhcNMzQwNzI1MTEyNjMx
+      WjAjMSEwHwYDVQQDDBhrM3Mtc2VydmVyLWNhQDE3MjIwNzk1OTEwWTATBgcqhkjO
+      PQIBBggqhkjOPQMBBwNCAARHVzM4NeiJe6D/4k6YHDMY0UlwGSkXrf6/IlDgXG+m
+      FKfEmC9LFcnGoeGBHGYs75JEX5gBvEcQ29LajM4xzuleo0IwQDAOBgNVHQ8BAf8E
+      BAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUYTYcMhMi25g83Ai0tkDR
+      2v4ywvMwCgYIKoZIzj0EAwIDRwAwRAIgHOnePfdnaP4S3KpojdcGKlWQsDFPYwEv
+      9bPRIfqs6cECIHLvGORVz57RhD7pVnuB8D+YZaol6tVQlRwYvqLxoZiJ
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2024-07-27T21:51:44Z"
+    name: kube-root-ca.crt
+    namespace: media
+    resourceVersion: "61787"
+    uid: c1a79b98-63d9-4805-8690-f43e24ff2222
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"batch/v1","kind":"CronJob","metadata":{"annotations":{},"name":"tdarr-node-pause-saturday","namespace":"media"},"spec":{"concurrencyPolicy":"Forbid","failedJobsHistoryLimit":3,"jobTemplate":{"spec":{"backoffLimit":3,"template":{"spec":{"containers":[{"args":["-n","media","scale","statefulset/tdarr-node","--replicas=0"],"command":["kubectl"],"image":"rancher/kubectl:v1.29.6","name":"scale-down"}],"restartPolicy":"OnFailure","serviceAccountName":"tdarr-scaler"}}}},"schedule":"0 0 * * 6","successfulJobsHistoryLimit":3,"timeZone":"Pacific/Auckland"}}
+    creationTimestamp: "2026-06-22T00:22:10Z"
+    generation: 4
+    name: tdarr-node-pause-saturday
+    namespace: media
+    resourceVersion: "184771974"
+    uid: a89d672b-e700-4aa3-b724-67e3954b8215
+  spec:
+    concurrencyPolicy: Forbid
+    failedJobsHistoryLimit: 3
+    jobTemplate:
+      metadata: {}
+      spec:
+        backoffLimit: 3
+        template:
+          metadata: {}
+          spec:
+            containers:
+            - args:
+              - -n
+              - media
+              - scale
+              - statefulset/tdarr-node
+              - --replicas=0
+              command:
+              - kubectl
+              image: rancher/kubectl:v1.29.6
+              imagePullPolicy: IfNotPresent
+              name: scale-down
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+            dnsPolicy: ClusterFirst
+            restartPolicy: OnFailure
+            schedulerName: default-scheduler
+            securityContext: {}
+            serviceAccount: tdarr-scaler
+            serviceAccountName: tdarr-scaler
+            terminationGracePeriodSeconds: 30
+    schedule: 0 0 * * 6
+    successfulJobsHistoryLimit: 3
+    suspend: false
+    timeZone: Pacific/Auckland
+  status:
+    lastScheduleTime: "2026-10-30T11:00:00Z"
+    lastSuccessfulTime: "2026-10-30T11:00:05Z"
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"batch/v1","kind":"CronJob","metadata":{"annotations":{},"name":"tdarr-node-unpause-tuesday","namespace":"media"},"spec":{"concurrencyPolicy":"Forbid","failedJobsHistoryLimit":3,"jobTemplate":{"spec":{"backoffLimit":3,"template":{"spec":{"containers":[{"args":["-n","media","scale","statefulset/tdarr-node","--replicas=1"],"command":["kubectl"],"image":"rancher/kubectl:v1.29.6","name":"scale-up"}],"restartPolicy":"OnFailure","serviceAccountName":"tdarr-scaler"}}}},"schedule":"55 1 * * 2","successfulJobsHistoryLimit":3,"timeZone":"Pacific/Auckland"}}
+    creationTimestamp: "2026-06-22T00:22:10Z"
+    generation: 4
+    name: tdarr-node-unpause-tuesday
+    namespace: media
+    resourceVersion: "183858932"
+    uid: ad3d90a0-2c2a-4f16-b743-9ddbb02981a0
+  spec:
+    concurrencyPolicy: Forbid
+    failedJobsHistoryLimit: 3
+    jobTemplate:
+      metadata: {}
+      spec:
+        backoffLimit: 3
+        template:
+          metadata: {}
+          spec:
+            containers:
+            - args:
+              - -n
+              - media
+              - scale
+              - statefulset/tdarr-node
+              - --replicas=1
+              command:
+              - kubectl
+              image: rancher/kubectl:v1.29.6
+              imagePullPolicy: IfNotPresent
+              name: scale-up
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+            dnsPolicy: ClusterFirst
+            restartPolicy: OnFailure
+            schedulerName: default-scheduler
+            securityContext: {}
+            serviceAccount: tdarr-scaler
+            serviceAccountName: tdarr-scaler
+            terminationGracePeriodSeconds: 30
+    schedule: 55 1 * * 2
+    successfulJobsHistoryLimit: 3
+    suspend: false
+    timeZone: Pacific/Auckland
+  status:
+    lastScheduleTime: "2026-10-26T12:55:00Z"
+    lastSuccessfulTime: "2026-10-26T12:55:06Z"
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2026-02-28T02:13:27Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: cleanuparr
+    name: config-cleanuparr-0
+    namespace: media
+    resourceVersion: "128786861"
+    uid: d61661c2-0b2c-4dcb-b18f-22095d11e0d4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-d61661c2-0b2c-4dcb-b18f-22095d11e0d4
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T00:22:49Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: nzbget
+    name: config-nzbget-0
+    namespace: media
+    resourceVersion: "246158"
+    uid: e2583c97-70fc-412c-a5b2-f11b210b8a2c
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-e2583c97-70fc-412c-a5b2-f11b210b8a2c
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-30T00:33:30Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: overseerr
+    name: config-overseerr-0
+    namespace: media
+    resourceVersion: "413140"
+    uid: d173ec69-49b7-4309-a4ad-215b96af6a26
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-d173ec69-49b7-4309-a4ad-215b96af6a26
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-05-04T11:21:45Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: plex
+    name: config-plex-0
+    namespace: media
+    resourceVersion: "59989833"
+    uid: d374326b-e0ec-41a0-a205-e1654c04edd6
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 128Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-d374326b-e0ec-41a0-a205-e1654c04edd6
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 128Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T01:22:27Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: prowlarr
+    name: config-prowlarr-0
+    namespace: media
+    resourceVersion: "253202"
+    uid: 3086a1d2-aa0b-48ef-be5f-d9dc68cfa23c
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-3086a1d2-aa0b-48ef-be5f-d9dc68cfa23c
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T03:15:56Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: qbittorrent
+    name: config-qbittorrent-0
+    namespace: media
+    resourceVersion: "266559"
+    uid: 1a8fe1bb-5c39-4c5e-bcdb-b480f4588fb5
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-1a8fe1bb-5c39-4c5e-bcdb-b480f4588fb5
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T02:30:02Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: radarr
+    name: config-radarr-0
+    namespace: media
+    resourceVersion: "261199"
+    uid: 157d00da-de2f-4550-b4c7-089dafd84163
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-157d00da-de2f-4550-b4c7-089dafd84163
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-28T23:57:11Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: sonarr
+    name: config-sonarr-0
+    namespace: media
+    resourceVersion: "243047"
+    uid: 9e5ef976-e58c-4a1d-be22-aa4d65b8987e
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-9e5ef976-e58c-4a1d-be22-aa4d65b8987e
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-07-29T03:36:48Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: tautulli
+    name: config-tautulli-0
+    namespace: media
+    resourceVersion: "269045"
+    uid: 272bbd38-ccf6-4402-9967-17db49b16deb
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-272bbd38-ccf6-4402-9967-17db49b16deb
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-bulk
+      volume.kubernetes.io/storage-provisioner: nfs-bulk
+    creationTimestamp: "2024-07-28T07:02:14Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: data
+    namespace: media
+    resourceVersion: "126478"
+    uid: c738344a-ea70-4571-bdda-1d439c0e17ad
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 24Ti
+    storageClassName: bulk-storage
+    volumeMode: Filesystem
+    volumeName: pvc-c738344a-ea70-4571-bdda-1d439c0e17ad
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 24Ti
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2026-06-05T05:59:17Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: storyteller
+    name: data-storyteller-0
+    namespace: media
+    resourceVersion: "151408760"
+    uid: c36ac474-c190-4797-b1d8-4ac9963209c1
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 50Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-c36ac474-c190-4797-b1d8-4ac9963209c1
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 50Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+    creationTimestamp: "2025-01-14T04:56:13Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      app.kubernetes.io/component: primary
+      app.kubernetes.io/instance: superset
+      app.kubernetes.io/name: postgresql
+    name: data-superset-postgresql-0
+    namespace: media
+    resourceVersion: "37307753"
+    uid: 8a01399b-1db0-4307-a7ec-6a164688a5a7
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 8Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-8a01399b-1db0-4307-a7ec-6a164688a5a7
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 8Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"local-config-plex-0","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"128Gi"}},"storageClassName":"local-path"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2024-08-08T23:04:49Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: local-config-plex-0
+    namespace: media
+    resourceVersion: "38494909"
+    uid: f2182385-f580-4e14-8d42-10839bf38ad4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 128Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: local-config-plex-0
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 512Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2024-10-21T23:53:24Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: sonarr
+    name: local-config-sonarr-0
+    namespace: media
+    resourceVersion: "17890448"
+    uid: 2f5d16b0-3803-4932-a590-3f212d6ff7a2
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-2f5d16b0-3803-4932-a590-3f212d6ff7a2
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2026-02-27T04:59:20Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: tdarr
+    name: local-config-tdarr-0
+    namespace: media
+    resourceVersion: "128579980"
+    uid: 9e642a0f-b80d-48f1-ab66-436c5ebe9392
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-9e642a0f-b80d-48f1-ab66-436c5ebe9392
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"local-data","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"24Ti"}},"storageClassName":"local-path"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2024-11-30T07:44:30Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: local-data
+    namespace: media
+    resourceVersion: "27024315"
+    uid: fefb7867-419e-4dfd-8992-0549ac620b58
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 24Ti
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-local-data
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 24Ti
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"media","namespace":"media"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"80Ti"}},"storageClassName":"local-path"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2025-05-04T10:50:04Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: media
+    namespace: media
+    resourceVersion: "59988661"
+    uid: 8cc379ff-5abb-489c-acff-2d0e22dc59bf
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 80Ti
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: media
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 80Ti
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2026-05-09T05:48:09Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: tdarr-node
+    name: tdarr-temp-tdarr-node-0
+    namespace: media
+    resourceVersion: "145106705"
+    uid: 8c2d8cb8-2d89-430b-acf4-76553b4e16c3
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 200Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-8c2d8cb8-2d89-430b-acf4-76553b4e16c3
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 200Gi
+    phase: Bound
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: "2024-07-27T21:51:44Z"
+    name: default
+    namespace: media
+    resourceVersion: "61786"
+    uid: c055a10a-eec0-4a89-9ed3-63a1c987fcdb
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"ServiceAccount","metadata":{"annotations":{},"name":"tdarr-scaler","namespace":"media"}}
+    creationTimestamp: "2026-06-28T02:11:31Z"
+    name: tdarr-scaler
+    namespace: media
+    resourceVersion: "156678128"
+    uid: 7ee26c50-a2de-4b32-9e59-6fdc847bd2d5
+kind: List
+metadata:
+  resourceVersion: ""

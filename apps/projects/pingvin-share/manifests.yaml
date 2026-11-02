@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pingvin-share
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: pingvin-share
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: pingvin-share
+      name: pingvin-share
+    spec:
+      containers:
+      - env:
+        - name: TZ
+          value: Pacific/Auckland
+        - name: TRUST_PROXY
+          value: 'true'
+        image: stonith404/pingvin-share
+        imagePullPolicy: Always
+        name: pingvin-share
+        ports:
+        - containerPort: 3000
+          name: pingvin-share
+        volumeMounts:
+        - mountPath: /opt/app/backend/data
+          name: data
+        - mountPath: /opt/app/frontend/public/img
+          name: images
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: pingvin-share
+      name: data
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 128Gi
+      storageClassName: local-path
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: pingvin-share
+      name: images
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingvin-share
+  namespace: rebnz
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    podinate.com/pod: pingvin-share
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: pingvin-share
+  name: pingvin-share
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: transfer.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: pingvin-share
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix

@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kuma
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: kuma
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: kuma
+      name: kuma
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: louislam/uptime-kuma
+        imagePullPolicy: Always
+        name: kuma
+        ports:
+        - containerPort: 3001
+          name: kumanp
+        - containerPort: 3001
+          name: uptimekuma
+        volumeMounts:
+        - mountPath: /app/data
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: kuma
+      name: config
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kumanp
+  namespace: rebnz
+spec:
+  ports:
+  - nodePort: 30400
+    port: 30400
+    targetPort: 3001
+  selector:
+    podinate.com/pod: kuma
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uptimekuma
+  namespace: rebnz
+spec:
+  ports:
+  - port: 3001
+    targetPort: 3001
+  selector:
+    podinate.com/pod: kuma
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    podinate.com/pod: kuma
+  name: kumanp
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: kuma.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: kumanp
+            port:
+              number: 30400
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: kuma
+  name: uptimekuma
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: uptime.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: uptimekuma
+            port:
+              number: 3001
+        path: /
+        pathType: Prefix

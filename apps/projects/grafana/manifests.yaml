@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: grafana
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: grafana
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: grafana
+      name: grafana
+    spec:
+      containers:
+      - env:
+        - name: GF_SERVER_DOMAIN
+          value: grafana.tools.reb.nz
+        - name: TZ
+          value: Pacific/Auckland
+        image: grafana/grafana
+        imagePullPolicy: Always
+        name: grafana
+        ports:
+        - containerPort: 3000
+          name: grafana
+        volumeMounts:
+        - mountPath: /var/lib/grafana
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: grafana
+      name: config
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: rebnz
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    podinate.com/pod: grafana
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: grafana
+  name: grafana
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: grafana.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix

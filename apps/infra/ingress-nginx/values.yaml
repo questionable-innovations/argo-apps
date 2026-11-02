@@ -1,0 +1,40 @@
+# ingress-nginx — chart https://kubernetes.github.io/ingress-nginx.
+# Chart 4.6.0 ships controller v1.7.0, i.e. exactly the version already running, so adopting
+# this chart does not change the controller image.
+#
+# MIGRATION NOTE: the live install was applied from the upstream static `deploy.yaml`, not Helm.
+# The controller Deployment/Service/ConfigMap and the `ingress-nginx` release labels already
+# match what this chart renders. Two differences to be aware of:
+#   1. The TCP passthrough ConfigMap is named `ingress-nginx-tcp` by the chart, where the live
+#      one is `tcp-services`. The old ConfigMap becomes unreferenced and can be deleted by hand.
+#   2. The extra LoadBalancer Service (`ingress-nginx-controller-loadbalancer`, the real
+#      192.168.1.251 entrypoint) was hand-made and is not a chart object. It is kept verbatim in
+#      static/manifests/ingress-nginx-loadbalancer.yaml.
+controller:
+  # Required by several Ingresses in this repo that use nginx.ingress.kubernetes.io/*-snippet.
+  allowSnippetAnnotations: true
+
+  service:
+    # The chart Service stays NodePort, as it is live. External traffic arrives via the separate
+    # LoadBalancer Service in static/manifests/, fronted by k3s klipper-lb.
+    type: NodePort
+
+  # The chart passes --publish-service so the controller can report an address in Ingress
+  # status. Point it at the LoadBalancer Service (the one that actually holds 192.168.1.251),
+  # not the chart's own NodePort Service, which has no external address.
+  publishService:
+    enabled: true
+    pathOverride: ingress-nginx/ingress-nginx-controller-loadbalancer
+
+  admissionWebhooks:
+    enabled: true
+
+# TCP passthrough for the Minecraft servers in the `games` namespace.
+#
+# WARNING: carried over verbatim from the live `tcp-services` ConfigMap, but it looks stale —
+# it points at port 25565/25566 on those Services, while the Services actually publish 31115
+# and 31116. The game servers are reachable on their NodePorts regardless, so this mapping is
+# likely dead. Verify before relying on it.
+tcp:
+  25565: "games/caleb-mc:25565"
+  25566: "games/vanilla-mc:25566"

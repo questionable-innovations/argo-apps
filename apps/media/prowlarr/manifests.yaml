@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: prowlarr
+  serviceName: ''
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-09T16:59:30+12:00'
+      labels:
+        podinate.com/pod: prowlarr
+      name: prowlarr
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: lscr.io/linuxserver/prowlarr
+        imagePullPolicy: Always
+        name: prowlarr
+        ports:
+        - containerPort: 9696
+          name: prowlarr
+        volumeMounts:
+        - mountPath: /config
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: prowlarr
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  ports:
+  - port: 9696
+    targetPort: 9696
+  selector:
+    podinate.com/pod: prowlarr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: prowlarr
+  name: prowlarr
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: prowlarr.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: prowlarr
+            port:
+              number: 9696
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - prowlarr.bloflix.com
+    secretName: prowlarr-tls

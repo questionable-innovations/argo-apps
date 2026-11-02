@@ -1,0 +1,3 @@
+# Helm chart caches, if anyone runs `helm dependency build` locally
+charts/
+Chart.lock

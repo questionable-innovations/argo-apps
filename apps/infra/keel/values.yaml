@@ -1,0 +1,41 @@
+# keel — chart https://charts.keel.sh. Watches for new image tags and updates workloads in
+# place; this is what keeps the `:latest` images across this cluster moving.
+#
+# MIGRATION NOTE: the live install was a hand-rolled Deployment using image keelhq/keel:latest.
+# This chart uses ghcr.io/keel-hq/keel at the chart's pinned app version instead, and brings
+# proper RBAC with it. The hand-made `keel` ClusterRole/ClusterRoleBinding and ServiceAccount
+# are replaced by the chart's equivalents.
+polling:
+  enabled: true
+  defaultSchedule: "@every 5m"
+
+extraEnv:
+  - name: DEBUG
+    value: "true"
+
+# Registry credentials for ghcr.io, so keel can poll the private images in the `russell`
+# namespace. The `ghcr-keel` Secret already exists in the cluster and is not managed here.
+extraVolumes:
+  - name: docker-config
+    secret:
+      secretName: ghcr-keel
+      items:
+        - key: .dockerconfigjson
+          path: config.json
+
+extraVolumeMounts:
+  - name: docker-config
+    mountPath: /root/.docker
+    readOnly: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# No web UI / notification providers were configured on the live install.
+helmProvider:
+  enabled: false

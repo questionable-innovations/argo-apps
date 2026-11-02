@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cleanuparr
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: cleanuparr
+  serviceName: ''
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-09T16:57:42+12:00'
+      labels:
+        podinate.com/pod: cleanuparr
+      name: cleanuparr
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: ghcr.io/cleanuparr/cleanuparr:2
+        imagePullPolicy: IfNotPresent
+        name: cleanuparr
+        ports:
+        - containerPort: 11011
+          name: cleanuparr
+        volumeMounts:
+        - mountPath: /config
+          name: config
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: cleanuparr
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cleanuparr
+  namespace: media
+spec:
+  ports:
+  - port: 11011
+    targetPort: 11011
+  selector:
+    podinate.com/pod: cleanuparr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: cleanuparr
+  name: cleanuparr
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: cleanuparr.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: cleanuparr
+            port:
+              number: 11011
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - cleanuparr.bloflix.com
+    secretName: cleanuparr-tls

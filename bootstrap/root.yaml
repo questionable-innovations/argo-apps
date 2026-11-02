@@ -1,0 +1,32 @@
+# The single Application you apply by hand. Everything else follows from it.
+#
+#   kubectl apply -n argocd -f bootstrap/projects.yaml
+#   kubectl apply -n argocd -f bootstrap/root.yaml
+#
+# It syncs bootstrap/apps/, which holds one Application per group. Each of those in turn syncs
+# apps/<group>/, picking up the per-app Applications there (recurse=false, so the manifest
+# subdirectories next to them are left to the apps themselves).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: bootstrap
+  source:
+    repoURL: https://github.com/LaSpruca/argo-apps.git
+    targetRevision: main
+    path: bootstrap/apps
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ApplyOutOfSyncOnly=true

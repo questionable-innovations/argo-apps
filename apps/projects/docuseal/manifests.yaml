@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: docuseal
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: docuseal
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: docuseal
+      name: docuseal
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: docuseal/docuseal
+        imagePullPolicy: Always
+        name: docuseal
+        ports:
+        - containerPort: 3000
+          name: docuseal
+        volumeMounts:
+        - mountPath: /data
+          name: data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: docuseal
+      name: data
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docuseal
+  namespace: rebnz
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    podinate.com/pod: docuseal
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: docuseal
+  name: docuseal
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: docuseal.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: docuseal
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix

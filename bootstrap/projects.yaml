@@ -1,0 +1,95 @@
+# AppProjects. These scope what each group of Applications is allowed to touch, so a mistake in
+# a media manifest can't reach into cluster-scoped resources or another namespace.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: bootstrap
+  namespace: argocd
+spec:
+  description: App-of-apps roots. Only ever manages Argo CD Applications.
+  sourceRepos:
+    - https://github.com/LaSpruca/argo-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  namespaceResourceWhitelist:
+    - group: argoproj.io
+      kind: Application
+    - group: argoproj.io
+      kind: AppProject
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra
+  namespace: argocd
+spec:
+  description: Cluster infrastructure. Needs cluster-scoped resources (CRDs, RBAC, webhooks).
+  sourceRepos:
+    - https://github.com/LaSpruca/argo-apps.git
+    - https://charts.jetstack.io
+    - https://helm.ngc.nvidia.com/nvidia
+    - https://kubernetes.github.io/ingress-nginx
+    - https://charts.keel.sh
+    - https://democratic-csi.github.io/charts/
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: media
+  namespace: argocd
+spec:
+  description: Media stack (Plex and friends).
+  sourceRepos:
+    - https://github.com/LaSpruca/argo-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: media
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: games
+  namespace: argocd
+spec:
+  description: Game servers.
+  sourceRepos:
+    - https://github.com/LaSpruca/argo-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: games
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: projects
+  namespace: argocd
+spec:
+  description: Self-hosted projects and tools, spread across the rebnz/russell/default namespaces.
+  sourceRepos:
+    - https://github.com/LaSpruca/argo-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: rebnz
+    - server: https://kubernetes.default.svc
+      namespace: russell
+    - server: https://kubernetes.default.svc
+      namespace: default
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

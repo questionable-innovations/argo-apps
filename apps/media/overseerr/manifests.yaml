@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: overseerr
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: overseerr
+  serviceName: ''
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-09T16:55:27+12:00'
+      labels:
+        podinate.com/pod: overseerr
+      name: overseerr
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: ghcr.io/seerr-team/seerr:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /api/v1/status
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: overseerr
+        ports:
+        - containerPort: 5055
+          name: overseerr
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/v1/status
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /app/config
+          name: config
+        - mountPath: /config
+          name: config
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: overseerr
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: overseerr
+  namespace: media
+spec:
+  ports:
+  - port: 5055
+    targetPort: 5055
+  selector:
+    podinate.com/pod: overseerr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: overseerr
+  name: overseerr
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: overseerr.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: overseerr
+            port:
+              number: 5055
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - overseerr.bloflix.com
+    secretName: overseerr-tls

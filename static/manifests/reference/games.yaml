@@ -1,0 +1,545 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-11-27T07:19:41Z"
+    generation: 7
+    name: caleb-mc
+    namespace: games
+    resourceVersion: "185442336"
+    uid: a6f000f1-c9a6-47e4-8465-86c65be56aa1
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: caleb-mc
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: caleb-mc
+        name: caleb-mc
+      spec:
+        containers:
+        - env:
+          - name: EULA
+            value: "true"
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: itzg/minecraft-server
+          imagePullPolicy: Always
+          name: caleb-mc
+          ports:
+          - containerPort: 25565
+            name: caleb-mc
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: server-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: caleb-mc
+        name: server-data
+        namespace: games
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: caleb-mc-6c898c67f8
+    observedGeneration: 7
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: caleb-mc-6c898c67f8
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"StatefulSet","metadata":{"annotations":{},"creationTimestamp":null,"name":"divine-journey","namespace":"games"},"spec":{"persistentVolumeClaimRetentionPolicy":{"whenDeleted":"Retain","whenScaled":"Retain"},"replicas":1,"selector":{"matchLabels":{"podinate.com/pod":"divine-journey"}},"serviceName":"","template":{"metadata":{"creationTimestamp":null,"labels":{"podinate.com/pod":"divine-journey"},"name":"divine-journey"},"spec":{"containers":[{"env":[{"name":"SPAWN_PROTECTION","value":"0"},{"name":"ALLOW_FLIGHT","value":"true"},{"name":"CF_SLUG","value":"divine-journey-2"},{"name":"CF_FILENAME_MATCHER","value":"2.23.4"},{"name":"CF_FORCE_INCLUDE_MODS","value":"hwyla"},{"name":"CF_API_KEY","value":"$2a$10$dS5nV7U4zYzrHQBnwL6BGuHXdN4TeBeYK5cTUEPWx/QfZTLmAJTyK"},{"name":"UID","value":"911"},{"name":"USE_AIKAR_FLAGS","value":"true"},{"name":"EULA","value":"true"},{"name":"GID","value":"911"},{"name":"MEMORY","value":"8G"},{"name":"TYPE","value":"AUTO_CURSEFORGE"},{"name":"TZ","value":"Pacific/Auckland"}],"image":"itzg/minecraft-server:java8","name":"divine-journey","resources":{},"volumeMounts":[{"mountPath":"/data","name":"server-data"}]}]}},"updateStrategy":{},"volumeClaimTemplates":[{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"volumeType":"local"},"creationTimestamp":null,"labels":{"podinate.com/pod":"divine-journey"},"name":"server-data","namespace":"games"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"20Gi"}},"storageClassName":"local-path","volumeMode":"Filesystem"},"status":{}}]},"status":{"availableReplicas":0,"replicas":0}}
+    creationTimestamp: "2026-01-06T17:51:13Z"
+    generation: 9
+    name: divine-journey
+    namespace: games
+    resourceVersion: "185442355"
+    uid: ddd61f03-238d-459f-9d85-9b7babfc3497
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: divine-journey
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: divine-journey
+        name: divine-journey
+      spec:
+        containers:
+        - env:
+          - name: SPAWN_PROTECTION
+            value: "0"
+          - name: ALLOW_FLIGHT
+            value: "true"
+          - name: CF_SLUG
+            value: divine-journey-2
+          - name: CF_FILENAME_MATCHER
+            value: 2.23.4
+          - name: CF_FORCE_INCLUDE_MODS
+            value: hwyla
+          - name: CF_API_KEY
+            value: $2a$10$dS5nV7U4zYzrHQBnwL6BGuHXdN4TeBeYK5cTUEPWx/QfZTLmAJTyK
+          - name: UID
+            value: "911"
+          - name: USE_AIKAR_FLAGS
+            value: "true"
+          - name: EULA
+            value: "true"
+          - name: GID
+            value: "911"
+          - name: MEMORY
+            value: 8G
+          - name: TYPE
+            value: AUTO_CURSEFORGE
+          - name: TZ
+            value: Pacific/Auckland
+          - name: JVM_OPTS
+            value: -Dfml.queryResult=confirm
+          image: itzg/minecraft-server:java8
+          imagePullPolicy: Always
+          name: divine-journey
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: server-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: divine-journey
+        name: server-data
+        namespace: games
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: divine-journey-679fdf4fbf
+    observedGeneration: 9
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: divine-journey-679fdf4fbf
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-12-01T22:16:05Z"
+    generation: 18
+    name: vanilla-mc
+    namespace: games
+    resourceVersion: "185445615"
+    uid: 54661db2-9987-409d-b172-8ebf0b9d2273
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: vanilla-mc
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: vanilla-mc
+        name: vanilla-mc
+      spec:
+        containers:
+        - env:
+          - name: TYPE
+            value: PAPER
+          - name: TZ
+            value: Pacific/Auckland
+          - name: UID
+            value: "911"
+          - name: USE_AIKAR_FLAGS
+            value: "true"
+          - name: EULA
+            value: "true"
+          - name: GID
+            value: "911"
+          - name: MEMORY
+            value: 4G
+          image: itzg/minecraft-server
+          imagePullPolicy: Always
+          name: vanilla-mc
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: server-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: vanilla-mc
+        name: server-data
+        namespace: games
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 0
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: vanilla-mc-d69db57d7
+    observedGeneration: 18
+    replicas: 1
+    updateRevision: vanilla-mc-d69db57d7
+    updatedReplicas: 1
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"caleb-mc","namespace":"games"},"spec":{"externalTrafficPolicy":"Cluster","internalTrafficPolicy":"Cluster","ports":[{"nodePort":31115,"port":31115,"protocol":"TCP","targetPort":25565}],"selector":{"podinate.com/pod":"caleb-mc"},"sessionAffinity":"None","type":"NodePort"}}
+    creationTimestamp: "2024-12-01T22:47:08Z"
+    name: caleb-mc
+    namespace: games
+    resourceVersion: "27397955"
+    uid: 32f5cc70-aa32-4156-a85f-5fe7511c1a6b
+  spec:
+    clusterIP: 10.43.236.117
+    clusterIPs:
+    - 10.43.236.117
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 31115
+      port: 31115
+      protocol: TCP
+      targetPort: 25565
+    selector:
+      podinate.com/pod: caleb-mc
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"divine-journey","namespace":"games"},"spec":{"externalTrafficPolicy":"Cluster","internalTrafficPolicy":"Cluster","ports":[{"nodePort":31117,"port":31117,"protocol":"TCP","targetPort":25565}],"selector":{"podinate.com/pod":"divine-journey"},"sessionAffinity":"None","type":"NodePort"}}
+    creationTimestamp: "2026-01-06T17:50:57Z"
+    name: divine-journey
+    namespace: games
+    resourceVersion: "116969382"
+    uid: 59ea2c8f-4165-42ac-a29b-eaf7babc6c7a
+  spec:
+    clusterIP: 10.43.65.58
+    clusterIPs:
+    - 10.43.65.58
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 31117
+      port: 31117
+      protocol: TCP
+      targetPort: 25565
+    selector:
+      podinate.com/pod: divine-journey
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"vanilla-mc","namespace":"games"},"spec":{"externalTrafficPolicy":"Cluster","internalTrafficPolicy":"Cluster","ports":[{"nodePort":31116,"port":31116,"protocol":"TCP","targetPort":25565}],"selector":{"podinate.com/pod":"vanilla-mc"},"sessionAffinity":"None","type":"NodePort"}}
+    creationTimestamp: "2024-12-01T22:46:12Z"
+    name: vanilla-mc
+    namespace: games
+    resourceVersion: "27397912"
+    uid: 948d5072-a0c0-47e0-b748-ed88b8c2db92
+  spec:
+    clusterIP: 10.43.252.82
+    clusterIPs:
+    - 10.43.252.82
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 31116
+      port: 31116
+      protocol: TCP
+      targetPort: 25565
+    selector:
+      podinate.com/pod: vanilla-mc
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    creationTimestamp: "2024-11-27T07:26:02Z"
+    generation: 1
+    labels:
+      podinate.com/pod: caleb-mc
+    name: caleb-mc
+    namespace: games
+    resourceVersion: "185442542"
+    uid: edcd233b-cf7d-4f8d-960b-43a3b539ed78
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: caleb-mc.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: caleb-mc
+              port:
+                number: 25565
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIBdjCCAR2gAwIBAgIBADAKBggqhkjOPQQDAjAjMSEwHwYDVQQDDBhrM3Mtc2Vy
+      dmVyLWNhQDE3MjIwNzk1OTEwHhcNMjQwNzI3MTEyNjMxWhcNMzQwNzI1MTEyNjMx
+      WjAjMSEwHwYDVQQDDBhrM3Mtc2VydmVyLWNhQDE3MjIwNzk1OTEwWTATBgcqhkjO
+      PQIBBggqhkjOPQMBBwNCAARHVzM4NeiJe6D/4k6YHDMY0UlwGSkXrf6/IlDgXG+m
+      FKfEmC9LFcnGoeGBHGYs75JEX5gBvEcQ29LajM4xzuleo0IwQDAOBgNVHQ8BAf8E
+      BAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUYTYcMhMi25g83Ai0tkDR
+      2v4ywvMwCgYIKoZIzj0EAwIDRwAwRAIgHOnePfdnaP4S3KpojdcGKlWQsDFPYwEv
+      9bPRIfqs6cECIHLvGORVz57RhD7pVnuB8D+YZaol6tVQlRwYvqLxoZiJ
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2024-11-27T07:19:40Z"
+    name: kube-root-ca.crt
+    namespace: games
+    resourceVersion: "26329641"
+    uid: 03f96e93-9d4f-44e8-83ab-67a1ad5b3028
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2024-11-27T07:19:41Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: caleb-mc
+    name: server-data-caleb-mc-0
+    namespace: games
+    resourceVersion: "26329753"
+    uid: 12fa84a6-85a4-4556-9f51-bc178e076ed4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-12fa84a6-85a4-4556-9f51-bc178e076ed4
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 20Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2026-01-06T17:51:13Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: divine-journey
+    name: server-data-divine-journey-0
+    namespace: games
+    resourceVersion: "116969499"
+    uid: 84fd4147-0979-4f6a-bafe-f453b00a5c1b
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-84fd4147-0979-4f6a-bafe-f453b00a5c1b
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 20Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2024-12-01T22:16:05Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: vanilla-mc
+    name: server-data-vanilla-mc-0
+    namespace: games
+    resourceVersion: "27392450"
+    uid: 19cf8daa-4225-4aa6-82a6-60f071e209ec
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-19cf8daa-4225-4aa6-82a6-60f071e209ec
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 20Gi
+    phase: Bound
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: "2024-11-27T07:19:40Z"
+    name: default
+    namespace: games
+    resourceVersion: "26329640"
+    uid: 36aeb128-f46f-4bfd-87ca-bb4d2e36c208
+kind: List
+metadata:
+  resourceVersion: ""

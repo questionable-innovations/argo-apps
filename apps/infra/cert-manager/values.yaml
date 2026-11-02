@@ -1,0 +1,4 @@
+# cert-manager — chart https://charts.jetstack.io, pinned to the live release (v1.18.2).
+# Matches `helm get values cert-manager -n cert-manager` exactly.
+crds:
+  enabled: true

@@ -1,0 +1,1753 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-08-16T06:43:56Z"
+    generation: 1
+    name: docuseal
+    namespace: rebnz
+    resourceVersion: "182384734"
+    uid: 99a6f71c-d547-44fb-9029-78dc2f727245
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: docuseal
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: docuseal
+        name: docuseal
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: docuseal/docuseal
+          imagePullPolicy: Always
+          name: docuseal
+          ports:
+          - containerPort: 3000
+            name: docuseal
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: docuseal
+        name: data
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: docuseal-df67b7f5b
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: docuseal-df67b7f5b
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-08-07T02:51:18Z"
+    generation: 4
+    name: domainmod
+    namespace: rebnz
+    resourceVersion: "182384554"
+    uid: 7b79e534-0d31-4184-96a6-96fcc1709920
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: domainmod
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: domainmod
+        name: domainmod
+      spec:
+        containers:
+        - env:
+          - name: PUID
+            value: "1000"
+          - name: TIME_ZONE
+            value: Europe/Zurich
+          - name: TZ
+            value: Pacific/Auckland
+          - name: DOMAINMOD_DATABASE
+            value: domainmod
+          - name: DOMAINMOD_DATABASE_HOST
+            value: domainmod-db
+          - name: DOMAINMOD_PASSWORD
+            value: password1
+          - name: DOMAINMOD_USER
+            value: domainmod
+          - name: PGID
+            value: "1000"
+          image: domainmod/domainmod:latest
+          imagePullPolicy: Always
+          name: domainmod
+          ports:
+          - containerPort: 80
+            name: domainmod
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/www/html
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: domainmod
+        name: config
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: domainmod-8664555bc7
+    observedGeneration: 4
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: domainmod-8664555bc7
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    generation: 4
+    name: domainmod-db
+    namespace: rebnz
+    resourceVersion: "182384513"
+    uid: ef274288-b692-4b08-ad5f-a0d285f58f35
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: domainmod-db
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: domainmod-db
+        name: domainmod-db
+      spec:
+        containers:
+        - env:
+          - name: MYSQL_DATABASE
+            value: domainmod
+          - name: MYSQL_PASSWORD
+            value: password1
+          - name: MYSQL_ROOT_PASSWORD
+            value: password2
+          - name: MYSQL_USER
+            value: domainmod
+          image: lscr.io/linuxserver/mariadb:alpine
+          imagePullPolicy: IfNotPresent
+          name: domainmod-db
+          ports:
+          - containerPort: 3306
+            name: domainmod-db
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /config
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: domainmod-db
+        name: config
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: domainmod-db-5556bd984f
+    observedGeneration: 4
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: domainmod-db-5556bd984f
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2025-01-14T05:10:34Z"
+    generation: 3
+    name: grafana
+    namespace: rebnz
+    resourceVersion: "182383951"
+    uid: 50f70ffe-da5a-4a84-adb1-01a9ce27c82d
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: grafana
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: grafana
+        name: grafana
+      spec:
+        containers:
+        - env:
+          - name: GF_SERVER_DOMAIN
+            value: grafana.tools.reb.nz
+          - name: TZ
+            value: Pacific/Auckland
+          image: grafana/grafana
+          imagePullPolicy: Always
+          name: grafana
+          ports:
+          - containerPort: 3000
+            name: grafana
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/grafana
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: grafana
+        name: config
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: grafana-86bbc66bb6
+    observedGeneration: 3
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: grafana-86bbc66bb6
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-12-03T00:47:40Z"
+    generation: 4
+    name: kuma
+    namespace: rebnz
+    resourceVersion: "182384590"
+    uid: cbae577c-6c10-407c-9bf6-1c55f7e1f719
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: kuma
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: kuma
+        name: kuma
+      spec:
+        containers:
+        - env:
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: louislam/uptime-kuma
+          imagePullPolicy: Always
+          name: kuma
+          ports:
+          - containerPort: 3001
+            name: kumanp
+            protocol: TCP
+          - containerPort: 3001
+            name: uptimekuma
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /app/data
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: kuma
+        name: config
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: kuma-58675f995d
+    observedGeneration: 4
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: kuma-58675f995d
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2025-01-14T19:56:53Z"
+    generation: 1
+    name: pingvin-share
+    namespace: rebnz
+    resourceVersion: "182383935"
+    uid: 7fa40795-aacd-46e2-8164-4a0fdf707124
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: pingvin-share
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: pingvin-share
+        name: pingvin-share
+      spec:
+        containers:
+        - env:
+          - name: TZ
+            value: Pacific/Auckland
+          - name: TRUST_PROXY
+            value: "true"
+          image: stonith404/pingvin-share
+          imagePullPolicy: Always
+          name: pingvin-share
+          ports:
+          - containerPort: 3000
+            name: pingvin-share
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/app/backend/data
+            name: data
+          - mountPath: /opt/app/frontend/public/img
+            name: images
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: pingvin-share
+        name: data
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 128Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: pingvin-share
+        name: images
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: pingvin-share-7484487c78
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: pingvin-share-7484487c78
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    creationTimestamp: "2024-08-21T20:34:51Z"
+    generation: 1
+    name: s-pdf
+    namespace: rebnz
+    resourceVersion: "182384512"
+    uid: cc34067e-74d9-438a-a2e3-82a467636263
+  spec:
+    persistentVolumeClaimRetentionPolicy:
+      whenDeleted: Retain
+      whenScaled: Retain
+    podManagementPolicy: OrderedReady
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        podinate.com/pod: s-pdf
+    serviceName: ""
+    template:
+      metadata:
+        labels:
+          podinate.com/pod: s-pdf
+        name: s-pdf
+      spec:
+        containers:
+        - env:
+          - name: DOCKER_ENABLE_SECURITY
+            value: "false"
+          - name: INSTALL_BOOK_AND_ADVANCED_HTML_OPS
+            value: "false"
+          - name: LANGS
+            value: en_GB
+          - name: PGID
+            value: "911"
+          - name: PUID
+            value: "911"
+          - name: TZ
+            value: Pacific/Auckland
+          image: frooodle/s-pdf
+          imagePullPolicy: Always
+          name: s-pdf
+          ports:
+          - containerPort: 8080
+            name: s-pdf
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /configs
+            name: configs
+          - mountPath: /usr/share/tessdata
+            name: tessdata
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    updateStrategy:
+      rollingUpdate:
+        partition: 0
+      type: RollingUpdate
+    volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: s-pdf
+        name: configs
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        annotations:
+          volumeType: local
+        labels:
+          podinate.com/pod: s-pdf
+        name: tessdata
+        namespace: rebnz
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: app-data
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  status:
+    availableReplicas: 1
+    collisionCount: 0
+    currentReplicas: 1
+    currentRevision: s-pdf-58dc6d5c84
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updateRevision: s-pdf-58dc6d5c84
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "2"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"tailscale","namespace":"rebnz"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"tailscale"}},"template":{"metadata":{"labels":{"app":"tailscale"}},"spec":{"containers":[{"env":[{"name":"TS_AUTHKEY","valueFrom":{"secretKeyRef":{"key":"TS_AUTHKEY","name":"tailscale-auth"}}},{"name":"TS_KUBE_SECRET","value":"tailscale-state"},{"name":"TS_USERSPACE","value":"false"},{"name":"TS_ROUTES","value":"10.42.0.0/16,10.43.0.0/16"}],"image":"tailscale/tailscale:latest","name":"tailscale","securityContext":{"capabilities":{"add":["NET_ADMIN"]}}}],"dnsPolicy":"ClusterFirstWithHostNet","hostNetwork":true,"serviceAccountName":"tailscale"}}}}
+    creationTimestamp: "2026-01-06T17:43:32Z"
+    generation: 2
+    name: tailscale
+    namespace: rebnz
+    resourceVersion: "185441306"
+    uid: 58723a53-4969-41e6-9f50-ead089f63e88
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: tailscale
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: tailscale
+      spec:
+        containers:
+        - env:
+          - name: TS_AUTHKEY
+            valueFrom:
+              secretKeyRef:
+                key: TS_AUTHKEY
+                name: tailscale-auth
+          - name: TS_KUBE_SECRET
+            value: tailscale-state
+          - name: TS_USERSPACE
+            value: "false"
+          - name: TS_ROUTES
+            value: 10.42.0.0/16,10.43.0.0/16
+          image: tailscale/tailscale:latest
+          imagePullPolicy: Always
+          name: tailscale
+          resources: {}
+          securityContext:
+            capabilities:
+              add:
+              - NET_ADMIN
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirstWithHostNet
+        hostNetwork: true
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: tailscale
+        serviceAccountName: tailscale
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-01-06T17:43:32Z"
+      lastUpdateTime: "2026-01-06T17:44:42Z"
+      message: ReplicaSet "tailscale-84c5c6d4f6" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2026-10-20T05:04:32Z"
+      lastUpdateTime: "2026-10-20T05:04:32Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 2
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-01-14T04:11:07Z"
+    name: clickhouse-http
+    namespace: rebnz
+    resourceVersion: "37300089"
+    uid: 247209b1-c2ca-4ede-af24-58a2944ccab4
+  spec:
+    clusterIP: 10.43.127.89
+    clusterIPs:
+    - 10.43.127.89
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8123
+      protocol: TCP
+      targetPort: 8123
+    selector:
+      podinate.com/pod: clickhouse
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-01-14T04:11:07Z"
+    name: clickhouse-native
+    namespace: rebnz
+    resourceVersion: "37300084"
+    uid: a6a79103-dbf5-4828-b8c3-ce7be06c582c
+  spec:
+    clusterIP: 10.43.126.164
+    clusterIPs:
+    - 10.43.126.164
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 9000
+      protocol: TCP
+      targetPort: 9000
+    selector:
+      podinate.com/pod: clickhouse
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-08-16T06:43:56Z"
+    name: docuseal
+    namespace: rebnz
+    resourceVersion: "4307427"
+    uid: 362a8d60-608d-4d42-81f7-6b2a4f41eac5
+  spec:
+    clusterIP: 10.43.115.254
+    clusterIPs:
+    - 10.43.115.254
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      podinate.com/pod: docuseal
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    name: domainmod
+    namespace: rebnz
+    resourceVersion: "2210517"
+    uid: 53060604-945b-4344-bedb-60acaa0312bb
+  spec:
+    clusterIP: 10.43.230.18
+    clusterIPs:
+    - 10.43.230.18
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      podinate.com/pod: domainmod
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    name: domainmod-db
+    namespace: rebnz
+    resourceVersion: "2207113"
+    uid: e4252aec-aabd-48fc-a850-819899f4946c
+  spec:
+    clusterIP: 10.43.212.120
+    clusterIPs:
+    - 10.43.212.120
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+    selector:
+      podinate.com/pod: domainmod-db
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-01-14T05:10:34Z"
+    name: grafana
+    namespace: rebnz
+    resourceVersion: "37310681"
+    uid: c46ebeb0-d1d7-4afa-8cf8-6c4d2cb7b5fc
+  spec:
+    clusterIP: 10.43.245.141
+    clusterIPs:
+    - 10.43.245.141
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      podinate.com/pod: grafana
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-01-18T20:14:04Z"
+    name: kumanp
+    namespace: rebnz
+    resourceVersion: "38374049"
+    uid: 89848761-df04-436f-9cd2-f2b451cfb037
+  spec:
+    clusterIP: 10.43.125.49
+    clusterIPs:
+    - 10.43.125.49
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - nodePort: 30400
+      port: 30400
+      protocol: TCP
+      targetPort: 3001
+    selector:
+      podinate.com/pod: kuma
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2025-01-14T19:56:53Z"
+    name: pingvin-share
+    namespace: rebnz
+    resourceVersion: "37452635"
+    uid: 3cab8b09-015a-4728-b6a9-e9465710a8ec
+  spec:
+    clusterIP: 10.43.67.58
+    clusterIPs:
+    - 10.43.67.58
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      podinate.com/pod: pingvin-share
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-08-21T20:34:51Z"
+    name: s-pdf
+    namespace: rebnz
+    resourceVersion: "5590180"
+    uid: 0a92843a-761a-495f-bcbc-2166c02d3628
+  spec:
+    clusterIP: 10.43.31.211
+    clusterIPs:
+    - 10.43.31.211
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      podinate.com/pod: s-pdf
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-12-29T02:28:51Z"
+    name: trilium
+    namespace: rebnz
+    resourceVersion: "33631619"
+    uid: 22251127-dcd0-4cca-b9e0-03069d4d925c
+  spec:
+    clusterIP: 10.43.213.176
+    clusterIPs:
+    - 10.43.213.176
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      podinate.com/pod: trilium
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-12-03T00:47:40Z"
+    name: uptimekuma
+    namespace: rebnz
+    resourceVersion: "27647422"
+    uid: 58cb3a30-9bc4-47e6-8ad8-e95facabbb8e
+  spec:
+    clusterIP: 10.43.186.64
+    clusterIPs:
+    - 10.43.186.64
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 3001
+      protocol: TCP
+      targetPort: 3001
+    selector:
+      podinate.com/pod: kuma
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2024-08-16T06:43:56Z"
+    generation: 2
+    labels:
+      podinate.com/pod: docuseal
+    name: docuseal
+    namespace: rebnz
+    resourceVersion: "185442535"
+    uid: ecb9746b-bf6d-4fed-ac54-810c77ee22e4
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: docuseal.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: docuseal
+              port:
+                number: 3000
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    generation: 4
+    labels:
+      podinate.com/pod: domainmod
+    name: domainmod
+    namespace: rebnz
+    resourceVersion: "185442527"
+    uid: 4ea68f43-166f-4f45-a2b7-152dd53eb07f
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: domainmod.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: domainmod
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2025-01-14T05:10:34Z"
+    generation: 2
+    labels:
+      podinate.com/pod: grafana
+    name: grafana
+    namespace: rebnz
+    resourceVersion: "185442553"
+    uid: 4f83ae50-a047-472e-9a8f-35b517728379
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: grafana.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: grafana
+              port:
+                number: 3000
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    creationTimestamp: "2025-01-18T20:14:04Z"
+    generation: 1
+    labels:
+      podinate.com/pod: kuma
+    name: kumanp
+    namespace: rebnz
+    resourceVersion: "185442493"
+    uid: d1219683-0063-430e-a82c-9414d235dcbe
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: kuma.bloflix.com
+      http:
+        paths:
+        - backend:
+            service:
+              name: kumanp
+              port:
+                number: 30400
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2025-01-14T19:56:54Z"
+    generation: 2
+    labels:
+      podinate.com/pod: pingvin-share
+    name: pingvin-share
+    namespace: rebnz
+    resourceVersion: "185442555"
+    uid: 2b6ed3ce-eb28-4058-9e09-323ae525575b
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: transfer.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: pingvin-share
+              port:
+                number: 3000
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2024-08-21T20:34:50Z"
+    generation: 2
+    labels:
+      podinate.com/pod: s-pdf
+    name: s-pdf
+    namespace: rebnz
+    resourceVersion: "185442536"
+    uid: 11a00924-31d4-49c7-a908-2621b8d2340d
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: pdf.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: s-pdf
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+    creationTimestamp: "2024-12-29T02:28:51Z"
+    generation: 2
+    labels:
+      podinate.com/pod: trilium
+    name: trilium
+    namespace: rebnz
+    resourceVersion: "185442549"
+    uid: cf81dae5-1e7b-4f65-bed4-61a172c5d334
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: trilium.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: trilium
+              port:
+                number: 8080
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    creationTimestamp: "2024-12-03T00:47:40Z"
+    generation: 2
+    labels:
+      podinate.com/pod: kuma
+    name: uptimekuma
+    namespace: rebnz
+    resourceVersion: "185442551"
+    uid: e404d7af-3045-4ea6-b877-c974093ca9f3
+  spec:
+    ingressClassName: nginx
+    rules:
+    - host: uptime.tools.reb.nz
+      http:
+        paths:
+        - backend:
+            service:
+              name: uptimekuma
+              port:
+                number: 3001
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 192.168.1.251
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIBdjCCAR2gAwIBAgIBADAKBggqhkjOPQQDAjAjMSEwHwYDVQQDDBhrM3Mtc2Vy
+      dmVyLWNhQDE3MjIwNzk1OTEwHhcNMjQwNzI3MTEyNjMxWhcNMzQwNzI1MTEyNjMx
+      WjAjMSEwHwYDVQQDDBhrM3Mtc2VydmVyLWNhQDE3MjIwNzk1OTEwWTATBgcqhkjO
+      PQIBBggqhkjOPQMBBwNCAARHVzM4NeiJe6D/4k6YHDMY0UlwGSkXrf6/IlDgXG+m
+      FKfEmC9LFcnGoeGBHGYs75JEX5gBvEcQ29LajM4xzuleo0IwQDAOBgNVHQ8BAf8E
+      BAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUYTYcMhMi25g83Ai0tkDR
+      2v4ywvMwCgYIKoZIzj0EAwIDRwAwRAIgHOnePfdnaP4S3KpojdcGKlWQsDFPYwEv
+      9bPRIfqs6cECIHLvGORVz57RhD7pVnuB8D+YZaol6tVQlRwYvqLxoZiJ
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    name: kube-root-ca.crt
+    namespace: rebnz
+    resourceVersion: "2207094"
+    uid: 6a4d96a8-6581-416a-8ff9-f65f0cb1bb8d
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-08-07T02:51:28Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: domainmod
+    name: config-domainmod-0
+    namespace: rebnz
+    resourceVersion: "2207865"
+    uid: 924a21b5-4cae-4628-b548-145eea7aaaa4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-924a21b5-4cae-4628-b548-145eea7aaaa4
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: domainmod-db
+    name: config-domainmod-db-0
+    namespace: rebnz
+    resourceVersion: "2207214"
+    uid: 0b9f56d2-669c-4378-acb7-a31060ca5c72
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-0b9f56d2-669c-4378-acb7-a31060ca5c72
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-01-14T05:10:34Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: grafana
+    name: config-grafana-0
+    namespace: rebnz
+    resourceVersion: "37310720"
+    uid: c75fd010-1df4-4eb6-9971-b819939bc7b0
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-c75fd010-1df4-4eb6-9971-b819939bc7b0
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-12-03T00:47:40Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: kuma
+    name: config-kuma-0
+    namespace: rebnz
+    resourceVersion: "27647488"
+    uid: 8def86f4-2b6a-4fe4-aada-d2468fc36d28
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-8def86f4-2b6a-4fe4-aada-d2468fc36d28
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-12-03T00:47:07Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: nzbget
+    name: config-nzbget-0
+    namespace: rebnz
+    resourceVersion: "27647285"
+    uid: f8dd0819-199e-4108-8260-c2f4a3adccea
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-f8dd0819-199e-4108-8260-c2f4a3adccea
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-08-21T20:34:51Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: s-pdf
+    name: configs-s-pdf-0
+    namespace: rebnz
+    resourceVersion: "5590281"
+    uid: eb370f53-6bbb-490c-82cc-35987880e7d8
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-eb370f53-6bbb-490c-82cc-35987880e7d8
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-01-14T04:30:49Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: clickhouse
+    name: data-clickhouse-0
+    namespace: rebnz
+    resourceVersion: "37303711"
+    uid: 5714c62a-be93-4464-814c-34dbf88e8ccb
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 128Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-5714c62a-be93-4464-814c-34dbf88e8ccb
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 128Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-08-16T06:43:56Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: docuseal
+    name: data-docuseal-0
+    namespace: rebnz
+    resourceVersion: "4307510"
+    uid: 5974b520-9a21-4c4a-930c-41f0369d2df2
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-5974b520-9a21-4c4a-930c-41f0369d2df2
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-12-08T23:49:15Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: docuseal-tmp
+    name: data-docuseal-tmp-0
+    namespace: rebnz
+    resourceVersion: "29000207"
+    uid: 944237f8-d2ca-4500-a8ea-e804948172cd
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-944237f8-d2ca-4500-a8ea-e804948172cd
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-01-14T19:56:53Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: pingvin-share
+    name: data-pingvin-share-0
+    namespace: rebnz
+    resourceVersion: "37452751"
+    uid: a88c3cc6-e6ce-4815-8e8b-e16c5c158afd
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 128Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-a88c3cc6-e6ce-4815-8e8b-e16c5c158afd
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 128Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-01-14T19:56:53Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: pingvin-share
+    name: images-pingvin-share-0
+    namespace: rebnz
+    resourceVersion: "37452747"
+    uid: 876730f0-f578-4ed7-9caa-b22c9e5ade06
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-876730f0-f578-4ed7-9caa-b22c9e5ade06
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: k3s
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volumeType: local
+    creationTimestamp: "2025-01-14T04:30:49Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: clickhouse
+    name: logs-clickhouse-0
+    namespace: rebnz
+    resourceVersion: "37303714"
+    uid: c304eca6-e625-4d32-b562-4663e47bb6f7
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-c304eca6-e625-4d32-b562-4663e47bb6f7
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: nfs-app-data
+      volume.kubernetes.io/storage-provisioner: nfs-app-data
+      volumeType: local
+    creationTimestamp: "2024-08-21T20:34:51Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      podinate.com/pod: s-pdf
+    name: tessdata-s-pdf-0
+    namespace: rebnz
+    resourceVersion: "5590276"
+    uid: 5ba53007-1cda-4d72-86b7-186938c6d0b5
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: app-data
+    volumeMode: Filesystem
+    volumeName: pvc-5ba53007-1cda-4d72-86b7-186938c6d0b5
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    phase: Bound
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: "2024-08-07T02:48:27Z"
+    name: default
+    namespace: rebnz
+    resourceVersion: "2207093"
+    uid: 96525e73-fd53-4767-b07b-c875d2e67337
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"ServiceAccount","metadata":{"annotations":{},"name":"tailscale","namespace":"rebnz"}}
+    creationTimestamp: "2026-01-06T17:43:29Z"
+    name: tailscale
+    namespace: rebnz
+    resourceVersion: "116968094"
+    uid: 18a4f93a-99e5-43fe-a397-08959ecd86eb
+kind: List
+metadata:
+  resourceVersion: ""

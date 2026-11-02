@@ -1,0 +1,46 @@
+# Namespaces for everything in this repo. The `default` namespace is not declared here — it is
+# created by Kubernetes itself and only hosts the ghost app.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: media
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: games
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rebnz
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: russell
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keel
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gpu-operator

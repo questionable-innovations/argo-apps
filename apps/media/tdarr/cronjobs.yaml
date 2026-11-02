@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tdarr-node-pause-saturday
+  namespace: media
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          containers:
+          - args:
+            - -n
+            - media
+            - scale
+            - statefulset/tdarr-node
+            - --replicas=0
+            command:
+            - kubectl
+            image: rancher/kubectl:v1.29.6
+            imagePullPolicy: IfNotPresent
+            name: scale-down
+          restartPolicy: OnFailure
+          serviceAccountName: tdarr-scaler
+  schedule: 0 0 * * 6
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  timeZone: Pacific/Auckland
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tdarr-node-unpause-tuesday
+  namespace: media
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          containers:
+          - args:
+            - -n
+            - media
+            - scale
+            - statefulset/tdarr-node
+            - --replicas=1
+            command:
+            - kubectl
+            image: rancher/kubectl:v1.29.6
+            imagePullPolicy: IfNotPresent
+            name: scale-up
+          restartPolicy: OnFailure
+          serviceAccountName: tdarr-scaler
+  schedule: 55 1 * * 2
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  timeZone: Pacific/Auckland

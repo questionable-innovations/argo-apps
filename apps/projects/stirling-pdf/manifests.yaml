@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: s-pdf
+  namespace: rebnz
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: s-pdf
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: s-pdf
+      name: s-pdf
+    spec:
+      containers:
+      - env:
+        - name: DOCKER_ENABLE_SECURITY
+          value: 'false'
+        - name: INSTALL_BOOK_AND_ADVANCED_HTML_OPS
+          value: 'false'
+        - name: LANGS
+          value: en_GB
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: frooodle/s-pdf
+        imagePullPolicy: Always
+        name: s-pdf
+        ports:
+        - containerPort: 8080
+          name: s-pdf
+        volumeMounts:
+        - mountPath: /configs
+          name: configs
+        - mountPath: /usr/share/tessdata
+          name: tessdata
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: s-pdf
+      name: configs
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: s-pdf
+      name: tessdata
+      namespace: rebnz
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s-pdf
+  namespace: rebnz
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    podinate.com/pod: s-pdf
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: s-pdf
+  name: s-pdf
+  namespace: rebnz
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: pdf.tools.reb.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: s-pdf
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix

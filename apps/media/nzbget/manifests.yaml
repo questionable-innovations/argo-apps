@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nzbget
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: nzbget
+  serviceName: ''
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2026-05-09T16:58:34+12:00'
+      labels:
+        podinate.com/pod: nzbget
+      name: nzbget
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: lscr.io/linuxserver/nzbget
+        imagePullPolicy: Always
+        name: nzbget
+        ports:
+        - containerPort: 6789
+          name: nzbget
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /data
+          name: media
+      volumes:
+      - name: media
+        persistentVolumeClaim:
+          claimName: media
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: nzbget
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 128Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nzbget
+  namespace: media
+spec:
+  ports:
+  - port: 6789
+    targetPort: 6789
+  selector:
+    podinate.com/pod: nzbget
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.0.0/16
+  labels:
+    podinate.com/pod: nzbget
+  name: nzbget
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: nzbget.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nzbget
+            port:
+              number: 6789
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - nzbget.bloflix.com
+    secretName: nzbget-tls

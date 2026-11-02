@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: plex
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: plex
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: plex
+      name: plex
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PLEX_CLAIM
+          value: claim-NJsdWGTekAapEu38tmN3
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute,utility,video
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: all
+        image: lscr.io/linuxserver/plex
+        imagePullPolicy: Always
+        name: plex
+        ports:
+        - containerPort: 32400
+          name: plex
+        resources:
+          limits:
+            cpu: '6'
+            memory: 8Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '2'
+            memory: 2Gi
+            nvidia.com/gpu: '1'
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /data
+          name: data
+      runtimeClassName: nvidia
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: media
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: plex
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 128Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plex
+  namespace: media
+spec:
+  ports:
+  - port: 32400
+    targetPort: 32400
+  selector:
+    podinate.com/pod: plex
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    podinate.com/pod: plex
+  name: plex-0
+  namespace: media
+spec:
+  ports:
+  - nodePort: 32400
+    port: 32400
+    targetPort: 32400
+  selector:
+    podinate.com/pod: plex
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    podinate.com/pod: plex
+  name: plex
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: plex.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: plex
+            port:
+              number: 32400
+        path: /
+        pathType: Prefix
