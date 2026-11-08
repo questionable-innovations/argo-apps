@@ -52,7 +52,7 @@ This is deliberate: a typo'd rename can't cascade-delete a workload and its PVCs
 app, remove its directory, then delete the Application by hand.
 
 **infra** stays as hand-written Applications under `apps/infra/`, picked up by the `infra-apps`
-Application with `recurse: false`. Each infra app has its own chart, version and release name,
+Application (non-recursive, so it sees only the `<app>.yaml` files). Each infra app has its own chart, version and release name,
 so there is nothing to generate.
 
 ## What is where

@@ -1,8 +1,10 @@
 # Shared cluster resources that no single app owns: namespaces, the ACME ClusterIssuer, the
 # pre-provisioned media PVCs, the ingress-nginx LoadBalancer Service.
 #
-# recurse=false keeps static/manifests/reference/ (verbatim cluster dumps, kept for diffing only)
-# out of the sync.
+# Directory sources are non-recursive by default, which keeps static/manifests/reference/
+# (verbatim cluster dumps, kept for diffing only) out of the sync. Don't set
+# `directory: {recurse: false}` explicitly: Argo strips the all-default block from the live
+# Application, so `root` would report it OutOfSync forever.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -16,8 +18,6 @@ spec:
     repoURL: https://github.com/LaSpruca/argo-apps.git
     targetRevision: main
     path: static/manifests
-    directory:
-      recurse: false
   destination:
     server: https://kubernetes.default.svc
     namespace: default
