@@ -1,24 +1,45 @@
-# Group root for apps/games. Syncs only the Application manifests sitting directly in that
-# directory (recurse=false) — the per-app manifest subdirectories are owned by those Applications.
+# Generates one Application per directory matching apps/games/* — adding an app is just adding a
+# directory of manifests; there is no list to update.
+#
+# Safety:
+#   applicationsSync: create-update  — removing (or renaming/typo-ing) a directory never deletes
+#                                      the Application, so it can't cascade-delete a workload.
+#   preserveResourcesOnDeletion      — if the ApplicationSet itself is deleted, the generated
+#                                      Applications go but the workloads they manage stay.
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: games-apps
+  name: games
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: bootstrap
-  source:
-    repoURL: https://github.com/LaSpruca/argo-apps.git
-    targetRevision: main
-    path: apps/games
-    directory:
-      recurse: false
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/LaSpruca/argo-apps.git
+        revision: main
+        directories:
+          - path: apps/games/*
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    applicationsSync: create-update
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{ .path.basename }}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: games
+      source:
+        repoURL: https://github.com/LaSpruca/argo-apps.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: games
+      syncPolicy:
+        # Auto-sync is deliberately off until each app's first diff has been reviewed.
+        # See README.md "Adopting the live cluster" before enabling it.
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

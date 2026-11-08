@@ -13,21 +13,47 @@ the live cluster at time of writing. Nothing here is aspirational; it is what is
 bootstrap/            Applied by hand once; everything else follows from it
   projects.yaml       AppProjects (bootstrap / infra / media / projects / games)
   root.yaml           The app-of-apps root -> bootstrap/apps/
-  apps/               One Application per group, each pointing at apps/<group>/
+  apps/               media/games/projects ApplicationSets, the infra group Application, static
 
 apps/
-  <group>/
-    <app>.yaml        The Argo CD Application
-    <app>/            The manifests (or Helm values) it syncs
+  media/<app>/        Plain manifests — one Application generated per directory
+  games/<app>/        Plain manifests — one Application generated per directory
+  projects/<namespace>/<app>/
+                      Plain manifests — namespace taken from the path
+  infra/
+    <app>.yaml        Hand-written Application (Helm chart + version + values)
+    <app>/            Its Helm values (and any extra manifests)
 
 static/
   manifests/          Shared cluster resources no single app owns
     reference/        Verbatim `kubectl get -o yaml` dumps, NOT synced (kept for diffing)
 ```
 
-The three tiers exist so each group Application can sync `apps/<group>` with `recurse: false`:
-it picks up the `<app>.yaml` Application files sitting directly in the directory and leaves the
-manifest subdirectories beside them to the Applications themselves.
+### Adding an app
+
+For **media**, **games** and **projects**, create a directory of manifests and push it. Nothing
+else is needed. Each group is an ApplicationSet (`bootstrap/apps/<group>.yaml`) with a git
+directory generator, so every directory matching its glob becomes an Application named after the
+directory:
+
+| ApplicationSet | Glob | Namespace |
+|---|---|---|
+| `media` | `apps/media/*` | `media` |
+| `games` | `apps/games/*` | `games` |
+| `projects` | `apps/projects/*/*` | the `<namespace>` path segment (`rebnz`, `russell`, `default`) |
+
+A new projects namespace also needs adding to the `projects` AppProject's `destinations` and
+to `static/manifests/namespaces.yaml`.
+
+Directory names must be unique across all groups, because they become Application names.
+
+Deleting a directory does **not** delete its Application (`applicationsSync: create-update`).
+This is deliberate: a typo'd rename can't cascade-delete a workload and its PVCs. To retire an
+app, remove its directory, then delete the Application by hand.
+
+**infra** stays as hand-written Applications under `apps/infra/`, picked up by the `infra-apps`
+Application with `recurse: false`. Each infra app has its own chart, version and release name,
+so there is nothing to generate.
 
 ## What is where
 
@@ -35,7 +61,7 @@ manifest subdirectories beside them to the Applications themselves.
 |---|---|---|
 | `apps/media` | `media` | plex, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, tautulli, cleanuparr, storyteller, tdarr |
 | `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey |
-| `apps/projects` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
+| `apps/projects/<ns>` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
 | `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, keel, democratic-csi ×2 |
 
 `tdarr` is one Application covering the `tdarr` and `tdarr-node` StatefulSets, the two
@@ -93,8 +119,8 @@ All `*-tls` secrets are cert-manager output and regenerate themselves from the I
 
 ## Adopting the live cluster
 
-Auto-sync is **deliberately off** on every app Application. The two `bootstrap` tiers self-sync
-(they only manage Application objects); the leaf apps do not, so that the first diff of each can
+Auto-sync is **deliberately off** on every app Application. The root app and the group
+Applications/ApplicationSets self-sync (they only manage Argo objects); the leaf apps do not, so that the first diff of each can
 be eyeballed before anything is written to a live workload.
 
 ```sh
@@ -104,16 +130,22 @@ kubectl --context martin apply -f bootstrap/projects.yaml
 kubectl --context martin apply -f bootstrap/root.yaml
 ```
 
-The root app creates the group Applications, which create the ~30 leaf Applications. They will
+The root app creates the ApplicationSets and the infra group Application, which together create
+the 30 leaf Applications. They will
 all report `OutOfSync` initially — that is expected, because Argo has not yet stamped its
 tracking label on anything. Sync them one at a time and confirm the diff is only labels.
 
-Once satisfied, enable auto-sync per app by adding to its `syncPolicy`:
+Once satisfied, enable auto-sync by adding the following to the `syncPolicy`. For an infra app,
+add it in its `apps/infra/<app>.yaml`. For media, games or projects, add it in the ApplicationSet
+`template`, which turns it on for the whole group:
 
 ```yaml
     automated:
       selfHeal: true
 ```
+
+Don't toggle auto-sync on a generated app in the UI. The ApplicationSet owns those Applications
+and reverts the change on its next reconcile.
 
 Leave `prune: false` (the default) on the leaf apps. Pruning is how a typo in a path deletes a
 24Ti PVC.

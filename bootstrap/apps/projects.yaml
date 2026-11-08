@@ -1,24 +1,47 @@
-# Group root for apps/projects. Syncs only the Application manifests sitting directly in that
-# directory (recurse=false) — the per-app manifest subdirectories are owned by those Applications.
+# Generates one Application per directory matching apps/projects/*/* — adding an app is just adding a
+# directory of manifests; there is no list to update.
+#
+# Layout is apps/projects/<namespace>/<app>/ — the namespace is taken from the path, since these
+# apps are spread across rebnz, russell and default.
+# Safety:
+#   applicationsSync: create-update  — removing (or renaming/typo-ing) a directory never deletes
+#                                      the Application, so it can't cascade-delete a workload.
+#   preserveResourcesOnDeletion      — if the ApplicationSet itself is deleted, the generated
+#                                      Applications go but the workloads they manage stay.
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: projects-apps
+  name: projects
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: bootstrap
-  source:
-    repoURL: https://github.com/LaSpruca/argo-apps.git
-    targetRevision: main
-    path: apps/projects
-    directory:
-      recurse: false
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/LaSpruca/argo-apps.git
+        revision: main
+        directories:
+          - path: apps/projects/*/*
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    applicationsSync: create-update
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{ .path.basename }}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: projects
+      source:
+        repoURL: https://github.com/LaSpruca/argo-apps.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 2 }}'
+      syncPolicy:
+        # Auto-sync is deliberately off until each app's first diff has been reviewed.
+        # See README.md "Adopting the live cluster" before enabling it.
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

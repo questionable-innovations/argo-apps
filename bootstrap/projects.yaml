@@ -6,7 +6,7 @@ metadata:
   name: bootstrap
   namespace: argocd
 spec:
-  description: App-of-apps roots. Only ever manages Argo CD Applications.
+  description: App-of-apps roots. Only ever manages Argo CD Applications and ApplicationSets.
   sourceRepos:
     - https://github.com/LaSpruca/argo-apps.git
   destinations:
@@ -15,6 +15,8 @@ spec:
   namespaceResourceWhitelist:
     - group: argoproj.io
       kind: Application
+    - group: argoproj.io
+      kind: ApplicationSet
     - group: argoproj.io
       kind: AppProject
 ---
