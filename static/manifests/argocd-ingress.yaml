@@ -1,0 +1,36 @@
+# Exposes the Argo CD UI/API at https://argocd.qinnovate.nz.
+#
+# Argo CD itself is installed from upstream manifests and is not managed by this repo; only this
+# Ingress is. argocd-server keeps serving its own (self-signed) TLS, so nginx terminates the public
+# Let's Encrypt cert and re-encrypts to the backend (backend-protocol: HTTPS) — no change to
+# argocd-server flags or argocd-cmd-params-cm needed.
+#
+# The CLI goes through nginx over gRPC-web:
+#   argocd login argocd.qinnovate.nz --grpc-web
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  name: argocd-server
+  namespace: argocd
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: argocd.qinnovate.nz
+    http:
+      paths:
+      - backend:
+          service:
+            name: argocd-server
+            port:
+              number: 443
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - argocd.qinnovate.nz
+    # Not `argocd-server-tls`: argocd-server picks that name up as its own serving cert.
+    secretName: argocd-ingress-tls

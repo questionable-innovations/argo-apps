@@ -176,6 +176,18 @@ pod labels pasted onto it (the stale ones were stripped here). Both reproduced a
   `kube-system` nvidia device plugin. These are managed by k3s itself.
 - **Cluster CRDs and RuntimeClasses** not owned by an app in this repo.
 
+## Argo CD UI
+
+Argo CD itself is installed from upstream manifests and is not managed here. The one exception
+is `static/manifests/argocd-ingress.yaml`, which serves it at **https://argocd.qinnovate.nz**.
+nginx terminates the Let's Encrypt cert and re-encrypts to `argocd-server`'s own TLS
+(`backend-protocol: HTTPS`), so Argo's server config is untouched. The CLI must use gRPC-web
+through nginx:
+
+```sh
+argocd login argocd.qinnovate.nz --grpc-web
+```
+
 ## Pinned NodePorts
 
 Several Services pin `nodePort` equal to `port` deliberately, and these are externally
