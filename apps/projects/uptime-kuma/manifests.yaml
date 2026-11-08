@@ -30,8 +30,8 @@ spec:
         imagePullPolicy: Always
         name: kuma
         ports:
-        - containerPort: 3001
-          name: kumanp
+        # Live had a second entry (containerPort 3001, name kumanp). Duplicate containerPorts
+        # break server-side apply; both Services target the port by number, so it was dropped.
         - containerPort: 3001
           name: uptimekuma
         volumeMounts:
