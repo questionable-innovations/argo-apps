@@ -50,7 +50,7 @@ mounted as `$values` so the values file stays editable here.
 | App | Chart | Version | Notes |
 |---|---|---|---|
 | cert-manager | `charts.jetstack.io/cert-manager` | `v1.18.2` | Matches the live Helm release exactly |
-| gpu-operator | `helm.ngc.nvidia.com/nvidia/gpu-operator` | `v24.3.0` | Matches the live release exactly |
+| gpu-operator | `helm.ngc.nvidia.com/nvidia/gpu-operator` | `v25.3.4` | Matches the live release; see below |
 | democratic-csi-app-data | `democratic-csi/democratic-csi` | `0.14.6` | Zero-diff against live |
 | democratic-csi-bulk-storage | `democratic-csi/democratic-csi` | `0.14.6` | See "bulk-storage StorageClass" below |
 | ingress-nginx | `kubernetes.github.io/ingress-nginx` | `4.6.0` | **Migration** — was static manifests |
@@ -59,6 +59,12 @@ mounted as `$values` so the values file stays editable here.
 `gpu-operator` sets `helm.releaseName: gpu-operator-1722298273` to preserve the generated names
 of the node-feature-discovery sub-chart resources already in the cluster. Do not "tidy" this —
 renaming the release renames those objects.
+
+`gpu-operator` also syncs `apps/infra/gpu-operator/manifests/` as a third source, which holds
+the `nvidia-device-plugin-config` ConfigMap (GPU time-slicing: the one GPU is advertised as 4
+`nvidia.com/gpu` slots). `devicePlugin.config` in its values points at it. Its values also set
+`validator.plugin: null`. Without that, chart v25.3.4 renders `plugin: null` into the ClusterPolicy,
+which server-side apply rejects.
 
 Chart 4.6.0 of ingress-nginx ships controller `v1.7.0`, i.e. the exact image already running, so
 adopting it does not upgrade the controller.

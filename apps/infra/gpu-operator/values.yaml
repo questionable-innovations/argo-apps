@@ -1,5 +1,6 @@
-# NVIDIA GPU Operator — chart https://helm.ngc.nvidia.com/nvidia, pinned to the live release (v24.3.0).
-# Matches `helm get values gpu-operator-1722298273 -n gpu-operator` exactly.
+# NVIDIA GPU Operator — chart https://helm.ngc.nvidia.com/nvidia, pinned to the live release (v25.3.4).
+# Matches `helm get values gpu-operator-1722298273 -n gpu-operator`, plus the `validator.plugin`
+# override below.
 #
 # NOTE: the Application sets `helm.releaseName: gpu-operator-1722298273` to preserve the
 # generated names of the node-feature-discovery sub-chart resources already in the cluster.
@@ -20,6 +21,11 @@ toolkit:
       value: "true"
 
 devicePlugin:
+  # GPU time-slicing. The ConfigMap lives in manifests/ next to this file and is synced by the
+  # same Application. Removing this drops every GPU consumer back to a single exclusive slot.
+  config:
+    name: nvidia-device-plugin-config
+    default: any
   env:
     - name: PASS_DEVICE_SPECS
       value: "true"
@@ -35,6 +41,11 @@ devicePlugin:
       value: compute,compat32,graphics,utility,video
 
 validator:
+  # The chart defaults `validator.plugin.env: []`, which renders as `plugin: null` in the
+  # ClusterPolicy. Helm's client-side apply tolerates that; server-side apply rejects it
+  # ("spec.validator.plugin must be of type object"). Nulling the key skips the block entirely,
+  # which is also what the live ClusterPolicy has.
+  plugin: null
   driver:
     env:
       - name: DISABLE_DEV_CHAR_SYMLINK_CREATION

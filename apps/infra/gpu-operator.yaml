@@ -12,7 +12,7 @@ spec:
     # so the chart is never forked or vendored.
     - repoURL: https://helm.ngc.nvidia.com/nvidia
       chart: gpu-operator
-      targetRevision: "v24.3.0"
+      targetRevision: "v25.3.4"
       helm:
         releaseName: gpu-operator-1722298273
         valueFiles:
@@ -20,6 +20,11 @@ spec:
     - repoURL: https://github.com/LaSpruca/argo-apps.git
       targetRevision: main
       ref: values
+    # Plain manifests that belong with the operator but aren't part of the chart
+    # (the time-slicing ConfigMap).
+    - repoURL: https://github.com/LaSpruca/argo-apps.git
+      targetRevision: main
+      path: apps/infra/gpu-operator/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: gpu-operator
