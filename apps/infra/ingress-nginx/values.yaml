@@ -4,9 +4,11 @@
 #
 # MIGRATION NOTE: the live install was applied from the upstream static `deploy.yaml`, not Helm.
 # The controller Deployment/Service/ConfigMap and the `ingress-nginx` release labels already
-# match what this chart renders. Two differences to be aware of:
-#   1. The TCP passthrough ConfigMap is named `ingress-nginx-tcp` by the chart, where the live
-#      one is `tcp-services`. The old ConfigMap becomes unreferenced and can be deleted by hand.
+# match what this chart renders. Notes:
+#   1. No TCP passthrough. The live install had a `tcp-services` ConfigMap mapping 25565/25566
+#      to the Minecraft Services, but it was dead: the LoadBalancer Service only exposes 80/443,
+#      the controller never listened on those ports, and the game Services don't expose them.
+#      Players connect on the NodePorts (31115-31117). The old ConfigMap can be deleted by hand.
 #   2. The extra LoadBalancer Service (`ingress-nginx-controller-loadbalancer`, the real
 #      192.168.1.251 entrypoint) was hand-made and is not a chart object. It is kept verbatim in
 #      static/manifests/ingress-nginx-loadbalancer.yaml.
@@ -28,13 +30,3 @@ controller:
 
   admissionWebhooks:
     enabled: true
-
-# TCP passthrough for the Minecraft servers in the `games` namespace.
-#
-# WARNING: carried over verbatim from the live `tcp-services` ConfigMap, but it looks stale —
-# it points at port 25565/25566 on those Services, while the Services actually publish 31115
-# and 31116. The game servers are reachable on their NodePorts regardless, so this mapping is
-# likely dead. Verify before relying on it.
-tcp:
-  25565: "games/caleb-mc:25565"
-  25566: "games/vanilla-mc:25566"

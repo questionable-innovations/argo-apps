@@ -170,12 +170,13 @@ kubectl --context martin delete deployment keel -n keel
 keel is a stateless image-update poller, so this costs nothing but a short gap in polling. The
 hand-made `keel` ClusterRole/ClusterRoleBinding/ServiceAccount are superseded by the chart's.
 
-**ingress-nginx will roll once.** Adopting the chart adds Helm labels, the `--publish-service`
-flag, and containerPorts 25565/25566 for TCP passthrough, which restarts the controller pod. The
-image is unchanged. The TCP ConfigMap is renamed from `tcp-services` to the chart's
-`ingress-nginx-tcp`; delete the old one by hand afterwards. The two `ingress-nginx-admission-*`
-Jobs are Helm hooks with `hook-delete-policy: before-hook-creation`, which Argo honours, so their
-immutability is not a blocker.
+**ingress-nginx will roll once.** Adopting the chart adds Helm labels and the `--publish-service`
+flag, and drops the dead `--tcp-services-configmap` flag (see below), which restarts the
+controller pod. The image is unchanged. Delete the old `tcp-services` ConfigMap by hand afterwards.
+The admission ServiceAccount/RBAC and the two `ingress-nginx-admission-*` Jobs are Helm hooks in
+the chart, but were permanent objects in the old static install, so Argo flags them for pruning
+until the first sync. Their `before-hook-creation` delete policy replaces them during the sync,
+so Job immutability is not a blocker.
 
 **The `bulk-storage` StorageClass is missing from the cluster.** Its Helm release declares it, but
 it is not present — something deleted it. `media/data` (24Ti) is already bound so it still works,
@@ -185,10 +186,10 @@ but new `bulk-storage` claims would fail. Syncing `democratic-csi-bulk-storage` 
 `is-default-class: true`. A PVC with no `storageClassName` gets whichever the API server picks.
 Worth fixing, but out of scope here — `local-path` is k3s-managed, not in this repo.
 
-**The TCP passthrough mapping looks dead.** `tcp-services` maps 25565/25566 to
-`games/caleb-mc:25565` and `games/vanilla-mc:25566`, but those Services publish ports 31115 and
-31116. The game servers are reached on their NodePorts instead. Carried over verbatim; verify
-before relying on it.
+**The TCP passthrough was dead and has been dropped.** The live `tcp-services` ConfigMap mapped
+25565/25566 to the Minecraft Services, but no traffic could reach it: the LoadBalancer Service
+only exposes 80/443, the controller never listened on those ports, and the game Services don't
+expose them. Players connect on the NodePorts (31115-31117).
 
 **`plex` has `serviceName: ''`** on its StatefulSet, and the `plex-0` Service was hand-made with
 pod labels pasted onto it (the stale ones were stripped here). Both reproduced as-is.
