@@ -24,7 +24,10 @@ storageClasses:
       detachedVolumesFromSnapshots: "false"
     mountOptions:
       - noatime
-      - nfsvers=3
+      # NFSv4.1, not v3: v3 locking needs rpc.statd on the client, and unmounting after the
+      # pods are killed blocks ~10 minutes on "lockd: cannot unmonitor", stalling host shutdown.
+      # Only applies to newly provisioned PVs; existing PVs carry their own spec.mountOptions.
+      - nfsvers=4.1
     secrets:
       provisioner-secret:
       controller-publish-secret:
