@@ -77,8 +77,8 @@ mounted as `$values` so the values file stays editable here.
 |---|---|---|---|
 | cert-manager | `charts.jetstack.io/cert-manager` | `v1.18.2` | Matches the live Helm release exactly |
 | gpu-operator | `helm.ngc.nvidia.com/nvidia/gpu-operator` | `v25.3.4` | Matches the live release; see below |
-| democratic-csi-app-data | `democratic-csi/democratic-csi` | `0.14.6` | Differs from live only in the StorageClass `nfsvers` mount option (3 → 4.1) |
-| democratic-csi-bulk-storage | `democratic-csi/democratic-csi` | `0.14.6` | See "bulk-storage StorageClass" below |
+| democratic-csi-app-data | `democratic-csi/democratic-csi` | `0.15.1` | Driver image is `latest` (pulled on every pod start) |
+| democratic-csi-bulk-storage | `democratic-csi/democratic-csi` | `0.15.1` | See "bulk-storage StorageClass" below |
 | ingress-nginx | `kubernetes.github.io/ingress-nginx` | `4.6.0` | **Migration** — was static manifests |
 | keel | `charts.keel.sh/keel` | `1.2.3` | **Migration** — was a hand-rolled Deployment |
 

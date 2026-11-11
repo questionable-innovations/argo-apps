@@ -1,5 +1,5 @@
-# democratic-csi (bulk-storage) — chart https://democratic-csi.github.io/charts/, pinned to the
-# live release (0.14.6). Backs the "bulk-storage" StorageClass with NFS from TrueNAS at 192.168.1.250.
+# democratic-csi (bulk-storage) — chart https://democratic-csi.github.io/charts/, pinned to
+# 0.15.1. Backs the "bulk-storage" StorageClass with NFS from TrueNAS at 192.168.1.250.
 #
 # The TrueNAS API key is NOT in this repo. The chart reads the whole driver config from the
 # pre-existing in-cluster Secret below (the same name the chart would otherwise generate), so
