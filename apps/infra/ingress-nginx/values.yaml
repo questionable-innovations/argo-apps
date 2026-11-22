@@ -1,4 +1,10 @@
 # ingress-nginx — chart https://kubernetes.github.io/ingress-nginx.
+#
+# STANDBY: Traefik (apps/infra/traefik) now takes the traffic. This controller is retired
+# upstream and unpatched for CVE-2026-123007 / CVE-2026-123633; it is kept running, off the
+# LoadBalancer, only as a fallback until Traefik has proven itself. Remove it after that, but
+# keep the `nginx` IngressClass object, which Traefik's ingress-nginx provider relies on.
+#
 # Chart 4.6.0 ships controller v1.7.0, i.e. exactly the version already running, so adopting
 # this chart does not change the controller image.
 #
@@ -22,11 +28,12 @@ controller:
     type: NodePort
 
   # The chart passes --publish-service so the controller can report an address in Ingress
-  # status. Point it at the LoadBalancer Service (the one that actually holds 192.168.1.251),
-  # not the chart's own NodePort Service, which has no external address.
+  # status. Point it at the LoadBalancer Service that actually holds 192.168.1.251, which is now
+  # Traefik's. Traefik reports the same Service, so the two controllers agree on Ingress status
+  # while they run side by side.
   publishService:
     enabled: true
-    pathOverride: ingress-nginx/ingress-nginx-controller-loadbalancer
+    pathOverride: traefik/traefik
 
   admissionWebhooks:
     enabled: true

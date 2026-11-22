@@ -1,10 +1,14 @@
+# The old cluster entrypoint. Traefik's own Service (apps/infra/traefik) is now the LoadBalancer
+# on 192.168.1.251, and klipper-lb can only bind 80/443 for one Service at a time, so this one is
+# demoted to ClusterIP. It still selects the ingress-nginx pods: to fall back to nginx, set it
+# back to `type: LoadBalancer` with `externalTrafficPolicy: Local` (and Traefik's Service to
+# NodePort), then sync both. Delete it along with ingress-nginx.
 apiVersion: v1
 kind: Service
 metadata:
   name: ingress-nginx-controller-loadbalancer
   namespace: ingress-nginx
 spec:
-  healthCheckNodePort: 31702
   ports:
   - name: http
     port: 80
@@ -16,4 +20,4 @@ spec:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
-  type: LoadBalancer
+  type: ClusterIP

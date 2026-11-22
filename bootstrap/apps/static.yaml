@@ -1,5 +1,5 @@
 # Shared cluster resources that no single app owns: namespaces, the ACME ClusterIssuer, the
-# pre-provisioned media PVCs, the ingress-nginx LoadBalancer Service.
+# pre-provisioned media PVCs, the (now standby) ingress-nginx Service.
 #
 # Directory sources are non-recursive by default, which keeps static/manifests/reference/
 # (verbatim cluster dumps, kept for diffing only) out of the sync. Don't set

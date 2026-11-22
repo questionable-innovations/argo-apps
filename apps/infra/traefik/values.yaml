@@ -15,15 +15,23 @@ ingressClass:
   isDefaultClass: false
 
 providers:
+  kubernetesCRD:
+    # New install with no IngressRoutes yet, so opt in to collision-safe naming from the start.
+    safeNaming: true
   kubernetesIngressNGINX:
     enabled: true
+    # Report this chart's LoadBalancer Service (192.168.1.251) as the Ingress address.
+    # ingress-nginx is pointed at the same Service, so the two don't fight over Ingress status.
+    publishService:
+      enabled: true
 
 service:
   spec:
-    # STAGING: NodePort only, so Traefik can be tested with a Host header while the hand-made
-    # ingress-nginx LoadBalancer Service still owns 80/443 on the node (klipper-lb binds them as
-    # hostPorts, so only one LoadBalancer Service can hold them at a time).
-    type: NodePort
+    # This is the cluster entrypoint: k3s klipper-lb publishes it on the node, 192.168.1.251.
+    # klipper-lb binds 80/443 as hostPorts, so only one LoadBalancer Service can hold them at a
+    # time. To fall back to ingress-nginx, set this to NodePort and set the old Service in
+    # static/manifests/ingress-nginx-loadbalancer.yaml back to LoadBalancer, then sync both.
+    type: LoadBalancer
     # Preserve client source IPs. The whitelist-source-range allowlists depend on it.
     externalTrafficPolicy: Local
 

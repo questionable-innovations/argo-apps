@@ -100,8 +100,9 @@ adopting it does not upgrade the controller.
 patched for the nginx HTTP/2 bugs CVE-2026-123007 / CVE-2026-123633. Its ingress-nginx provider
 serves the existing `ingressClassName: nginx` Ingresses and their `nginx.ingress.kubernetes.io/*`
 annotations unchanged, so both controllers can run side by side. ingress-nginx stays deployed as
-a fallback until Traefik has proven itself; whichever one the LoadBalancer Service on
-192.168.1.251 points at is the one taking traffic.
+a fallback until Traefik has proven itself. Traefik's Service is the LoadBalancer on
+192.168.1.251; the old hand-made ingress-nginx one is demoted to ClusterIP. The fallback steps
+are in the comments of `apps/infra/traefik/values.yaml`.
 
 ## Secrets
 
