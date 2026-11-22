@@ -1,0 +1,46 @@
+# traefik — chart https://traefik.github.io/charts. Chart 42.4.1 ships Traefik v3.7.19.
+#
+# Traefik replaces ingress-nginx, which is retired upstream and will never get a fix for the
+# nginx HTTP/2 bugs CVE-2026-123007 / CVE-2026-123633.
+#
+# The Ingresses in this repo are NOT rewritten. Traefik's ingress-nginx provider serves
+# `ingressClassName: nginx` Ingresses and honours their `nginx.ingress.kubernetes.io/*`
+# annotations (every one used here is supported: ssl-redirect, whitelist-source-range,
+# backend-protocol, proxy-body-size, proxy-*-timeout). That keeps nginx semantics — e.g. only
+# Ingresses with a `tls:` block redirect to HTTPS, the body limit defaults to 1m — and lets
+# ingress-nginx keep running next to Traefik as a fallback, since both read the same objects.
+ingressClass:
+  enabled: true
+  # `nginx` stays the cluster default class for now.
+  isDefaultClass: false
+
+providers:
+  kubernetesIngressNGINX:
+    enabled: true
+
+service:
+  spec:
+    # STAGING: NodePort only, so Traefik can be tested with a Host header while the hand-made
+    # ingress-nginx LoadBalancer Service still owns 80/443 on the node (klipper-lb binds them as
+    # hostPorts, so only one LoadBalancer Service can hold them at a time).
+    type: NodePort
+    # Preserve client source IPs. The whitelist-source-range allowlists depend on it.
+    externalTrafficPolicy: Local
+
+ports:
+  # Traefik's entrypoint readTimeout covers the whole request including the body and defaults to
+  # 60s, which would cut off long uploads (storyteller raises nginx's limits for exactly that).
+  # nginx only times out between reads, so raise it well clear of any real upload.
+  web:
+    transport:
+      respondingTimeouts:
+        readTimeout: 1h
+  websecure:
+    transport:
+      respondingTimeouts:
+        readTimeout: 1h
+
+accessLog:
+  # Access logs show the client address Traefik sees, which is how to confirm the allowlists
+  # are matching real client IPs rather than a NAT'd node address.
+  enabled: true

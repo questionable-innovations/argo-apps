@@ -62,14 +62,14 @@ so there is nothing to generate.
 | `apps/media` | `media` | plex, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, tautulli, cleanuparr, storyteller, tdarr |
 | `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey |
 | `apps/projects/<ns>` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
-| `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, keel, democratic-csi ×2 |
+| `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, democratic-csi ×2 |
 
 `tdarr` is one Application covering the `tdarr` and `tdarr-node` StatefulSets, the two
 pause/unpause CronJobs, and the `tdarr-scaler` ServiceAccount/Role/RoleBinding they use.
 
 ## Helm
 
-The six `apps/infra` Applications consume **upstream charts directly** — nothing is forked or
+The seven `apps/infra` Applications consume **upstream charts directly** — nothing is forked or
 vendored. Each uses Argo's two-source pattern: the chart from its own repo, plus this repo
 mounted as `$values` so the values file stays editable here.
 
@@ -80,6 +80,7 @@ mounted as `$values` so the values file stays editable here.
 | democratic-csi-app-data | `democratic-csi/democratic-csi` | `0.15.1` | Driver image is `latest` (pulled on every pod start) |
 | democratic-csi-bulk-storage | `democratic-csi/democratic-csi` | `0.15.1` | See "bulk-storage StorageClass" below |
 | ingress-nginx | `kubernetes.github.io/ingress-nginx` | `4.6.0` | **Migration** — was static manifests |
+| traefik | `traefik.github.io/charts/traefik` | `42.4.1` | Replacing ingress-nginx; see below |
 | keel | `charts.keel.sh/keel` | `1.2.3` | **Migration** — was a hand-rolled Deployment |
 
 `gpu-operator` sets `helm.releaseName: gpu-operator-1722298273` to preserve the generated names
@@ -94,6 +95,13 @@ which server-side apply rejects.
 
 Chart 4.6.0 of ingress-nginx ships controller `v1.7.0`, i.e. the exact image already running, so
 adopting it does not upgrade the controller.
+
+`traefik` (v3.7.19) is taking over from ingress-nginx, which is retired upstream and will not be
+patched for the nginx HTTP/2 bugs CVE-2026-123007 / CVE-2026-123633. Its ingress-nginx provider
+serves the existing `ingressClassName: nginx` Ingresses and their `nginx.ingress.kubernetes.io/*`
+annotations unchanged, so both controllers can run side by side. ingress-nginx stays deployed as
+a fallback until Traefik has proven itself; whichever one the LoadBalancer Service on
+192.168.1.251 points at is the one taking traffic.
 
 ## Secrets
 
@@ -131,7 +139,7 @@ kubectl --context martin apply -f bootstrap/root.yaml
 ```
 
 The root app creates the ApplicationSets and the infra group Application, which together create
-the 30 leaf Applications. They will
+the 31 leaf Applications. They will
 all report `OutOfSync` initially — that is expected, because Argo has not yet stamped its
 tracking label on anything. Sync them one at a time and confirm the diff is only labels.
 
