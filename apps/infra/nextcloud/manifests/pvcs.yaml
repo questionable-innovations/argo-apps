@@ -1,0 +1,45 @@
+# Nextcloud's volumes, declared here rather than by the chart and handed to it as
+# `existingClaim`. Both StorageClasses have reclaimPolicy Delete: deleting one of these claims
+# destroys its TrueNAS dataset. Keeping them out of the chart means only a deliberate edit of
+# this file can do that.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nextcloud-app
+  namespace: nextcloud
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: app-data
+---
+# The users' files, on the bulk-storage pool. Expandable: raise the request and sync.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nextcloud-data
+  namespace: nextcloud
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Ti
+  storageClassName: bulk-storage
+---
+# Nightly PostgreSQL dumps (see postgres.yaml). On TrueNAS so the database can be restored on
+# any node even though the live database files are on one node's local disk.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nextcloud-db-backup
+  namespace: nextcloud
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: app-data

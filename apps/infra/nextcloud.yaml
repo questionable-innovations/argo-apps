@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nextcloud
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infra
+  sources:
+    # The upstream chart, pinned. Values are read from this repo via the `values` ref below,
+    # so the chart is never forked or vendored.
+    - repoURL: https://nextcloud.github.io/helm/
+      chart: nextcloud
+      targetRevision: "9.4.5"
+      helm:
+        valueFiles:
+          - $values/apps/infra/nextcloud/values.yaml
+    - repoURL: https://github.com/LaSpruca/argo-apps.git
+      targetRevision: main
+      ref: values
+    # Everything the chart is deliberately not trusted with: the PVCs, the SealedSecrets, and
+    # the PostgreSQL database with its nightly dump to TrueNAS.
+    - repoURL: https://github.com/LaSpruca/argo-apps.git
+      targetRevision: main
+      path: apps/infra/nextcloud/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nextcloud
+  syncPolicy:
+    # Auto-sync is deliberately off until each app's first diff has been reviewed.
+    # See README.md "Adopting the live cluster" before enabling it.
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

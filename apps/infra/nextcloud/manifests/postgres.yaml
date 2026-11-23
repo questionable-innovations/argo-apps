@@ -1,0 +1,137 @@
+# PostgreSQL for Nextcloud. A plain StatefulSet on the official image rather than the chart's
+# bundled sub-chart, which pulls from the unmaintained `bitnamilegacy` registry.
+#
+# The database files are on `local-path` (the node's own disk): a database wants local fsync
+# semantics, which NFS does not give. The cost is that the files are tied to one node, so the
+# CronJob below dumps the database to TrueNAS every night.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nextcloud-postgres
+  namespace: nextcloud
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextcloud-postgres
+  serviceName: nextcloud-postgres
+  template:
+    metadata:
+      labels:
+        app: nextcloud-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:17
+        env:
+        - name: POSTGRES_DB
+          value: nextcloud
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db
+              key: db-username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db
+              key: db-password
+        # A subdirectory, so initdb is not confused by anything at the volume root.
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+          name: postgres
+        readinessProbe:
+          exec:
+            command: ['sh', '-c', 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-postgres
+  namespace: nextcloud
+spec:
+  ports:
+  - port: 5432
+    targetPort: postgres
+  selector:
+    app: nextcloud-postgres
+---
+# Nightly logical dump to the `nextcloud-db-backup` volume on TrueNAS, keeping 14 days.
+# To restore: pg_restore --clean --if-exists -d nextcloud <file> against a fresh database.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nextcloud-postgres-backup
+  namespace: nextcloud
+spec:
+  # 02:30 NZ time, before Nextcloud's own maintenance window.
+  schedule: "30 2 * * *"
+  timeZone: Pacific/Auckland
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: pg-dump
+            image: postgres:17
+            command:
+            - sh
+            - -ec
+            - |
+              f=/backup/nextcloud-$(date +%Y%m%d-%H%M%S).dump
+              # Write to a temp name first so a failed dump never looks like a good backup.
+              pg_dump -h nextcloud-postgres -U "$PGUSER" -d nextcloud -Fc -f "$f.partial"
+              mv "$f.partial" "$f"
+              find /backup -name 'nextcloud-*.dump' -mtime +14 -delete
+              find /backup -name '*.partial' -mtime +1 -delete
+              ls -lh /backup
+            env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db
+                  key: db-username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db
+                  key: db-password
+            volumeMounts:
+            - mountPath: /backup
+              name: backup
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: nextcloud-db-backup

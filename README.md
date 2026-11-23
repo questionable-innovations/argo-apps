@@ -62,14 +62,14 @@ so there is nothing to generate.
 | `apps/media` | `media` | plex, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, tautulli, cleanuparr, storyteller, tdarr |
 | `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey |
 | `apps/projects/<ns>` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
-| `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, sealed-secrets, democratic-csi ×2 |
+| `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, sealed-secrets, nextcloud, democratic-csi ×2 |
 
 `tdarr` is one Application covering the `tdarr` and `tdarr-node` StatefulSets, the two
 pause/unpause CronJobs, and the `tdarr-scaler` ServiceAccount/Role/RoleBinding they use.
 
 ## Helm
 
-The eight `apps/infra` Applications consume **upstream charts directly** — nothing is forked or
+The nine `apps/infra` Applications consume **upstream charts directly** — nothing is forked or
 vendored. Each uses Argo's two-source pattern: the chart from its own repo, plus this repo
 mounted as `$values` so the values file stays editable here.
 
@@ -83,6 +83,7 @@ mounted as `$values` so the values file stays editable here.
 | traefik | `traefik.github.io/charts/traefik` | `42.4.1` | Replacing ingress-nginx; see below |
 | keel | `charts.keel.sh/keel` | `1.2.3` | **Migration** — was a hand-rolled Deployment |
 | sealed-secrets | `bitnami.github.io/sealed-secrets/sealed-secrets` | `2.22.0` | New install, in `kube-system`; see "Secrets" |
+| nextcloud | `nextcloud.github.io/helm/nextcloud` | `9.4.5` | New install; see "Nextcloud" below |
 
 `gpu-operator` sets `helm.releaseName: gpu-operator-1722298273` to preserve the generated names
 of the node-feature-discovery sub-chart resources already in the cluster. Do not "tidy" this —
@@ -104,6 +105,34 @@ annotations unchanged, so both controllers can run side by side. ingress-nginx s
 a fallback until Traefik has proven itself. Traefik's Service is the LoadBalancer on
 192.168.1.251; the old hand-made ingress-nginx one is demoted to ClusterIP. The fallback steps
 are in the comments of `apps/infra/traefik/values.yaml`.
+
+### Nextcloud
+
+`nextcloud` (Nextcloud 35.0.3) is served at **https://next.qinnovate.nz**. It is under
+`apps/infra` only because that is where the Helm-based Applications live. The chart owns just the
+Deployment, Service and Ingress; `apps/infra/nextcloud/manifests/` is synced as a third source
+and holds everything stateful:
+
+| What | Where | Storage |
+|---|---|---|
+| User files (`/var/www/html/data`) | PVC `nextcloud-data`, 2Ti | `bulk-storage` (TrueNAS NFS) |
+| Code, config, apps (`/var/www/html`) | PVC `nextcloud-app`, 10Gi | `app-data` (TrueNAS NFS) |
+| PostgreSQL 17 (`nextcloud-postgres`) | StatefulSet claim `data-nextcloud-postgres-0` | `local-path` (node disk) |
+| Nightly `pg_dump`, 14 days kept | PVC `nextcloud-db-backup`, 20Gi | `app-data` (TrueNAS NFS) |
+
+The database is on local disk because PostgreSQL should not run on NFS; the 02:30 dump CronJob
+is what gets it onto TrueNAS. Restore a dump with `pg_restore --clean --if-exists -d nextcloud`.
+
+The admin and database credentials are the SealedSecrets `nextcloud-admin` and `nextcloud-db`.
+The admin password is only used for the first install. Read it with:
+
+```sh
+kubectl --context martin get secret nextcloud-admin -n nextcloud \
+  -o jsonpath='{.data.nextcloud-password}' | base64 -d
+```
+
+Chart upgrades move Nextcloud itself: it only supports upgrading one major version at a time, so
+do not skip chart versions that span more than one.
 
 ## Secrets
 
@@ -167,7 +196,7 @@ kubectl --context martin apply -f bootstrap/root.yaml
 ```
 
 The root app creates the ApplicationSets and the infra group Application, which together create
-the 32 leaf Applications. They will
+the 33 leaf Applications. They will
 all report `OutOfSync` initially — that is expected, because Argo has not yet stamped its
 tracking label on anything. Sync them one at a time and confirm the diff is only labels.
 

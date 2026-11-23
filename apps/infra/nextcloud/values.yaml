@@ -1,0 +1,100 @@
+# nextcloud — chart https://nextcloud.github.io/helm/, pinned to 9.4.5 (Nextcloud 35.0.3,
+# apache image). Served at https://next.qinnovate.nz.
+#
+# The chart owns only the Nextcloud Deployment, Service and Ingress. The PVCs, credentials and
+# database live in apps/infra/nextcloud/manifests/ so that no chart change or `helm uninstall`
+# can take the data with it.
+nextcloud:
+  host: next.qinnovate.nz
+
+  # Admin login, from the `nextcloud-admin` SealedSecret. Only read on first install; after
+  # that the admin password lives in Nextcloud's database and is changed in the UI.
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-admin
+    usernameKey: nextcloud-username
+    passwordKey: nextcloud-password
+
+  extraEnv:
+    # Traefik terminates TLS and forwards plain HTTP from a pod IP. Trust the k3s pod network
+    # as a proxy so Nextcloud reads the real client address from X-Forwarded-For (brute-force
+    # throttling keys on it) instead of throttling Traefik itself.
+    - name: TRUSTED_PROXIES
+      value: 10.42.0.0/16
+    # Needed for `occ` and background jobs, which have no request to take the URL from.
+    - name: OVERWRITECLIURL
+      value: https://next.qinnovate.nz
+
+  configs:
+    region.config.php: |-
+      <?php
+      $CONFIG = array (
+        'default_phone_region' => 'NZ',
+        // Run the heavy daily background jobs overnight NZ time (value is the start hour, UTC).
+        'maintenance_window_start' => 13,
+      );
+
+# Generate https:// links even though the pod itself only ever sees plain HTTP from Traefik.
+phpClientHttpsFix:
+  enabled: true
+  protocol: https
+
+# SQLite (the chart default) must not be used: its file would sit on NFS, where its locking is
+# unsafe. PostgreSQL runs next to Nextcloud from manifests/postgres.yaml.
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: postgresql
+  host: nextcloud-postgres:5432
+  database: nextcloud
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-db
+    usernameKey: db-username
+    passwordKey: db-password
+
+persistence:
+  # /var/www/html: Nextcloud's code, config and installed apps. Small, on app-data.
+  enabled: true
+  existingClaim: nextcloud-app
+  # /var/www/html/data: the users' files. The big one, on the bulk-storage pool.
+  nextcloudData:
+    enabled: true
+    existingClaim: nextcloud-data
+
+# Background jobs via a crond sidecar, rather than the default of piggybacking on page loads.
+cronjob:
+  enabled: true
+
+ingress:
+  enabled: true
+  # `nginx` is the class every Ingress in this repo uses; Traefik serves it (see traefik values).
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    # No request body limit. The default is 1m, which breaks every upload.
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+  tls:
+    - secretName: nextcloud-tls
+      hosts:
+        - next.qinnovate.nz
+
+# The first start copies the whole of Nextcloud onto the NFS volume and runs the installer,
+# which takes minutes. Without a startup probe the liveness probe kills the pod mid-install.
+# Allow up to 30 minutes.
+startupProbe:
+  enabled: true
+  periodSeconds: 10
+  failureThreshold: 180
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    memory: 2Gi

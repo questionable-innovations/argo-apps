@@ -36,6 +36,7 @@ spec:
     - https://charts.keel.sh
     - https://democratic-csi.github.io/charts/
     - https://bitnami.github.io/sealed-secrets
+    - https://nextcloud.github.io/helm/
   destinations:
     - server: https://kubernetes.default.svc
       namespace: '*'
