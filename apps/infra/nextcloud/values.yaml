@@ -24,6 +24,35 @@ nextcloud:
     # Needed for `occ` and background jobs, which have no request to take the URL from.
     - name: OVERWRITECLIURL
       value: https://next.qinnovate.nz
+    # Outbound mail through Mailgun (domain mg.qinnovate.nz, US region). Set as plain env vars
+    # read by the image's smtp.config.php rather than through the chart's `nextcloud.mail`
+    # block, because that block insists the SMTP keys live in the admin-credentials Secret.
+    # The credential is a Mailgun SMTP login used only by Nextcloud; revoking it there is safe.
+    - name: MAIL_FROM_ADDRESS
+      value: nextcloud
+    - name: MAIL_DOMAIN
+      value: mg.qinnovate.nz
+    - name: SMTP_SECURE
+      value: ssl
+    - name: SMTP_PORT
+      value: "465"
+    - name: SMTP_AUTHTYPE
+      value: LOGIN
+    - name: SMTP_HOST
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-smtp
+          key: smtp-host
+    - name: SMTP_NAME
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-smtp
+          key: smtp-username
+    - name: SMTP_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: nextcloud-smtp
+          key: smtp-password
 
   # HSTS header; see manifests/apache-hsts.yaml. A ConfigMap mounted by subPath is not updated
   # in a running pod, so restart the Deployment after changing it.

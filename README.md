@@ -124,8 +124,9 @@ and holds everything stateful:
 The database is on local disk because PostgreSQL should not run on NFS; the 02:30 dump CronJob
 is what gets it onto TrueNAS. Restore a dump with `pg_restore --clean --if-exists -d nextcloud`.
 
-The admin, database and Redis credentials are the SealedSecrets `nextcloud-admin`,
-`nextcloud-db` and `nextcloud-redis`.
+The admin, database, Redis and SMTP credentials are the SealedSecrets `nextcloud-admin`,
+`nextcloud-db`, `nextcloud-redis` and `nextcloud-smtp`. Mail goes out through Mailgun as
+`nextcloud@mg.qinnovate.nz`.
 The admin password is only used for the first install. Read it with:
 
 ```sh
