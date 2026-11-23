@@ -62,14 +62,14 @@ so there is nothing to generate.
 | `apps/media` | `media` | plex, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, tautulli, cleanuparr, storyteller, tdarr |
 | `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey |
 | `apps/projects/<ns>` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
-| `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, democratic-csi ×2 |
+| `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, sealed-secrets, democratic-csi ×2 |
 
 `tdarr` is one Application covering the `tdarr` and `tdarr-node` StatefulSets, the two
 pause/unpause CronJobs, and the `tdarr-scaler` ServiceAccount/Role/RoleBinding they use.
 
 ## Helm
 
-The seven `apps/infra` Applications consume **upstream charts directly** — nothing is forked or
+The eight `apps/infra` Applications consume **upstream charts directly** — nothing is forked or
 vendored. Each uses Argo's two-source pattern: the chart from its own repo, plus this repo
 mounted as `$values` so the values file stays editable here.
 
@@ -82,6 +82,7 @@ mounted as `$values` so the values file stays editable here.
 | ingress-nginx | `kubernetes.github.io/ingress-nginx` | `4.6.0` | **Migration** — was static manifests |
 | traefik | `traefik.github.io/charts/traefik` | `42.4.1` | Replacing ingress-nginx; see below |
 | keel | `charts.keel.sh/keel` | `1.2.3` | **Migration** — was a hand-rolled Deployment |
+| sealed-secrets | `bitnami.github.io/sealed-secrets/sealed-secrets` | `2.22.0` | New install, in `kube-system`; see "Secrets" |
 
 `gpu-operator` sets `helm.releaseName: gpu-operator-1722298273` to preserve the generated names
 of the node-feature-discovery sub-chart resources already in the cluster. Do not "tidy" this —
@@ -106,8 +107,9 @@ are in the comments of `apps/infra/traefik/values.yaml`.
 
 ## Secrets
 
-**No secrets are in this repo.** Every Secret the workloads need already exists in the cluster
-and is left alone. If the cluster is ever rebuilt from scratch, these must be recreated by hand:
+**No plaintext secrets are in this repo.** New secrets go in as SealedSecrets (below). The
+older ones predate that: they already exist in the cluster and are left alone. If the cluster is
+ever rebuilt from scratch, these must be recreated by hand:
 
 | Secret | Namespace | Used by |
 |---|---|---|
@@ -126,6 +128,31 @@ Verified: with that set, the chart emits no config Secret, so a sync cannot clob
 
 All `*-tls` secrets are cert-manager output and regenerate themselves from the Ingresses.
 
+### Sealed Secrets
+
+The `sealed-secrets` app runs the controller as `sealed-secrets-controller` in `kube-system`,
+which is where `kubeseal` looks by default. To add a secret, seal it against the cluster and
+commit the result next to the app that uses it:
+
+```sh
+kubectl create secret generic my-secret -n my-namespace \
+  --from-literal=password=... --dry-run=client -o yaml \
+  | kubeseal --context martin --format yaml > my-secret.sealed.yaml
+```
+
+A SealedSecret is bound to its name and namespace; it will not decrypt under a different one.
+
+**Back up the sealing key.** It lives only in the cluster. Without it, a rebuilt cluster cannot
+decrypt anything sealed here. Keep the output somewhere outside the cluster and outside git,
+and repeat after key renewals (a new key is added every 30 days; old ones are kept):
+
+```sh
+kubectl --context martin get secret -n kube-system \
+  -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key.backup.yaml
+```
+
+To restore, apply that file to the new cluster before syncing `sealed-secrets`.
+
 ## Adopting the live cluster
 
 Auto-sync is **deliberately off** on every app Application. The root app and the group
@@ -140,7 +167,7 @@ kubectl --context martin apply -f bootstrap/root.yaml
 ```
 
 The root app creates the ApplicationSets and the infra group Application, which together create
-the 31 leaf Applications. They will
+the 32 leaf Applications. They will
 all report `OutOfSync` initially — that is expected, because Argo has not yet stamped its
 tracking label on anything. Sync them one at a time and confirm the diff is only labels.
 

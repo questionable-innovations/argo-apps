@@ -1,0 +1,19 @@
+# sealed-secrets — chart https://bitnami.github.io/sealed-secrets, pinned to 2.22.0
+# (controller v0.41.2). Decrypts SealedSecret objects committed to this repo into ordinary
+# Secrets, so credentials can live in git encrypted.
+#
+# `kubeseal` looks for a controller named `sealed-secrets-controller` in `kube-system` unless
+# told otherwise. The chart's default name is `sealed-secrets`, so the name is overridden here
+# and the Application targets kube-system; that way `kubeseal` works with no extra flags.
+fullnameOverride: sealed-secrets-controller
+
+# The controller generates its sealing key on first start and stores it as a Secret labelled
+# `sealedsecrets.bitnami.com/sealed-secrets-key` in kube-system. That key is the only thing
+# that can decrypt the SealedSecrets in this repo: back it up outside the cluster (see README).
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi
