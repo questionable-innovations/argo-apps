@@ -1,0 +1,57 @@
+# Redis for Nextcloud: transactional file locking, the distributed cache and PHP sessions.
+# Official image rather than the chart's sub-chart, which pulls from `bitnamilegacy`.
+#
+# Deliberately no volume. Everything in it is disposable: locks and cache are rebuilt, and
+# losing sessions only means users log in again after a Redis restart.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-redis
+  namespace: nextcloud
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nextcloud-redis
+  template:
+    metadata:
+      labels:
+        app: nextcloud-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:8
+        command: ['sh', '-c', 'exec redis-server --requirepass "$REDIS_PASSWORD" --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru']
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-redis
+              key: redis-password
+        ports:
+        - containerPort: 6379
+          name: redis
+        readinessProbe:
+          tcpSocket:
+            port: redis
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-redis
+  namespace: nextcloud
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis
+  selector:
+    app: nextcloud-redis

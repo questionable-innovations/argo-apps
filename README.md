@@ -118,12 +118,14 @@ and holds everything stateful:
 | User files (`/var/www/html/data`) | PVC `nextcloud-data`, 2Ti | `bulk-storage` (TrueNAS NFS) |
 | Code, config, apps (`/var/www/html`) | PVC `nextcloud-app`, 10Gi | `app-data` (TrueNAS NFS) |
 | PostgreSQL 17 (`nextcloud-postgres`) | StatefulSet claim `data-nextcloud-postgres-0` | `local-path` (node disk) |
+| Redis 8 (`nextcloud-redis`): file locks, cache, sessions | Deployment | none (disposable) |
 | Nightly `pg_dump`, 14 days kept | PVC `nextcloud-db-backup`, 20Gi | `app-data` (TrueNAS NFS) |
 
 The database is on local disk because PostgreSQL should not run on NFS; the 02:30 dump CronJob
 is what gets it onto TrueNAS. Restore a dump with `pg_restore --clean --if-exists -d nextcloud`.
 
-The admin and database credentials are the SealedSecrets `nextcloud-admin` and `nextcloud-db`.
+The admin, database and Redis credentials are the SealedSecrets `nextcloud-admin`,
+`nextcloud-db` and `nextcloud-redis`.
 The admin password is only used for the first install. Read it with:
 
 ```sh

@@ -67,6 +67,17 @@ externalDatabase:
     usernameKey: db-username
     passwordKey: db-password
 
+# Redis (manifests/redis.yaml) for file locking, the distributed cache and PHP sessions. Without
+# it Nextcloud takes file locks in PostgreSQL, which is slow under sync-client load.
+externalRedis:
+  enabled: true
+  host: nextcloud-redis
+  port: "6379"
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-redis
+    passwordKey: redis-password
+
 persistence:
   # /var/www/html: Nextcloud's code, config and installed apps. Small, on app-data.
   enabled: true
