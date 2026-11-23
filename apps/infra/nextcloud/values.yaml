@@ -25,6 +25,18 @@ nextcloud:
     - name: OVERWRITECLIURL
       value: https://next.qinnovate.nz
 
+  # HSTS header; see manifests/apache-hsts.yaml. A ConfigMap mounted by subPath is not updated
+  # in a running pod, so restart the Deployment after changing it.
+  extraVolumes:
+    - name: apache-hsts
+      configMap:
+        name: nextcloud-apache-hsts
+  extraVolumeMounts:
+    - name: apache-hsts
+      mountPath: /etc/apache2/conf-enabled/hsts.conf
+      subPath: hsts.conf
+      readOnly: true
+
   configs:
     region.config.php: |-
       <?php

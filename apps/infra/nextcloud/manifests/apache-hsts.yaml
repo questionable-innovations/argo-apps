@@ -1,0 +1,12 @@
+# Sends Strict-Transport-Security from Nextcloud's own Apache (mounted into conf-enabled by
+# `nextcloud.extraVolumes` in the values). Set here rather than at the ingress so it holds
+# whichever controller is in front, Traefik or the ingress-nginx fallback.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-apache-hsts
+  namespace: nextcloud
+data:
+  hsts.conf: |
+    # 180 days, the minimum Nextcloud's security check accepts.
+    Header always set Strict-Transport-Security "max-age=15552000"
