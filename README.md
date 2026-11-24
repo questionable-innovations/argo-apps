@@ -119,19 +119,35 @@ and holds everything stateful:
 | Code, config, apps (`/var/www/html`) | PVC `nextcloud-app`, 10Gi | `app-data` (TrueNAS NFS) |
 | PostgreSQL 17 (`nextcloud-postgres`) | StatefulSet claim `data-nextcloud-postgres-0` | `local-path` (node disk) |
 | Redis 8 (`nextcloud-redis`): file locks, cache, sessions | Deployment | none (disposable) |
+| Collabora Online (`nextcloud-collabora`): document editing | Deployment (chart subchart) | none (stateless) |
 | Nightly `pg_dump`, 14 days kept | PVC `nextcloud-db-backup`, 20Gi | `app-data` (TrueNAS NFS) |
 
 The database is on local disk because PostgreSQL should not run on NFS; the 02:30 dump CronJob
 is what gets it onto TrueNAS. Restore a dump with `pg_restore --clean --if-exists -d nextcloud`.
 
-The admin, database, Redis and SMTP credentials are the SealedSecrets `nextcloud-admin`,
-`nextcloud-db`, `nextcloud-redis` and `nextcloud-smtp`. Mail goes out through Mailgun as
+The admin, database, Redis, SMTP and Collabora admin-console credentials are the SealedSecrets
+`nextcloud-admin`, `nextcloud-db`, `nextcloud-redis`, `nextcloud-smtp` and `nextcloud-collabora`. Mail goes out through Mailgun as
 `nextcloud@mg.qinnovate.nz`.
 The admin password is only used for the first install. Read it with:
 
 ```sh
 kubectl --context martin get secret nextcloud-admin -n nextcloud \
   -o jsonpath='{.data.nextcloud-password}' | base64 -d
+```
+
+#### Nextcloud Office
+
+Documents are edited with Collabora Online at **https://office.qinnovate.nz**, through the
+Nextcloud Office (`richdocuments`) app. The app and its settings live in Nextcloud's database,
+not in git; on a rebuild, set them again:
+
+```bash
+occ() { kubectl --context martin -n nextcloud exec deploy/nextcloud -c nextcloud -- \
+  su -s /bin/sh www-data -c "php occ $*"; }
+occ app:install richdocuments
+occ config:app:set richdocuments wopi_url --value=http://nextcloud-collabora:9980
+occ config:app:set richdocuments public_wopi_url --value=https://office.qinnovate.nz
+occ richdocuments:activate-config
 ```
 
 Chart upgrades move Nextcloud itself: it only supports upgrading one major version at a time, so

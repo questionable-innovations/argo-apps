@@ -116,6 +116,52 @@ persistence:
     enabled: true
     existingClaim: nextcloud-data
 
+# Collabora Online (CODE), the document server behind the "Nextcloud Office" app. It is the
+# chart's own `collabora-online` subchart, served on its own hostname because browsers open a
+# websocket straight to it. Nextcloud itself talks to it over the in-cluster Service; that URL
+# and the public one are set with occ (see README "Nextcloud Office").
+collabora:
+  enabled: true
+  collabora:
+    # The only host allowed to open documents here.
+    aliasgroups:
+      - host: "https://next.qinnovate.nz:443"
+    # TLS ends at Traefik (and Cloudflare in front of it), so Collabora speaks plain HTTP but
+    # must still hand out https:// and wss:// URLs.
+    extra_params: --o:ssl.enable=false --o:ssl.termination=true
+    server_name: office.qinnovate.nz
+    # Login for the admin console at /browser/dist/admin/admin.html.
+    existingSecret:
+      enabled: true
+      secretName: nextcloud-collabora
+      usernameKey: username
+      passwordKey: password
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+      nginx.ingress.kubernetes.io/proxy-body-size: '0'
+      # Editing sessions are long-lived websockets.
+      nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+      nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+    hosts:
+      - host: office.qinnovate.nz
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: collabora-tls
+        hosts:
+          - office.qinnovate.nz
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+
 # Background jobs via a crond sidecar, rather than the default of piggybacking on page loads.
 cronjob:
   enabled: true
