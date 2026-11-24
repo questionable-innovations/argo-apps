@@ -122,6 +122,10 @@ persistence:
 # and the public one are set with occ (see README "Nextcloud Office").
 collabora:
   enabled: true
+  # The subchart's default image trails upstream, and Nextcloud nags when the server is behind.
+  # Tags: https://hub.docker.com/r/collabora/code/tags
+  image:
+    tag: "26.04.6.2.1"
   collabora:
     # The only host allowed to open documents here.
     aliasgroups:

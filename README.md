@@ -147,6 +147,8 @@ occ() { kubectl --context martin -n nextcloud exec deploy/nextcloud -c nextcloud
 occ app:install richdocuments
 occ config:app:set richdocuments wopi_url --value=http://nextcloud-collabora:9980
 occ config:app:set richdocuments public_wopi_url --value=https://office.qinnovate.nz
+# Collabora's callbacks hairpin through the router, so that is the address Nextcloud sees.
+occ config:app:set richdocuments wopi_allowlist --value=192.168.1.1
 occ richdocuments:activate-config
 ```
 
