@@ -7,6 +7,15 @@
 driver:
   enabled: true
 
+# CDI mode for every GPU container, in place of the legacy nvidia-container-runtime-hook.
+# The legacy hook cannot start a privileged container on quentin.lan (Rocky 10): the kernel
+# rejects the device-filter eBPF program it loads, so the operator validator never passes and
+# the node never advertises nvidia.com/gpu. To go back, set both to false and restart the GPU
+# pods (plex, tdarr-node).
+cdi:
+  enabled: true
+  default: true
+
 toolkit:
   enabled: true
   env:
@@ -31,8 +40,10 @@ devicePlugin:
       value: "true"
     - name: FAIL_ON_INIT_ERROR
       value: "true"
+    # Values set here override what the operator sets, so this has to name the CDI strategy
+    # itself. Plain `envvar` would leave the plugin handing out legacy device lists.
     - name: DEVICE_LIST_STRATEGY
-      value: envvar
+      value: envvar,cdi-annotations
     - name: DEVICE_ID_STRATEGY
       value: uuid
     - name: NVIDIA_VISIBLE_DEVICES
