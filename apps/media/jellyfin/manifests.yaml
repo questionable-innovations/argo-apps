@@ -1,0 +1,150 @@
+# Jellyfin, running beside Plex on the same library.
+#
+# Pinned to quentin.lan (GTX 1080): Plex and tdarr-node already share the 1050 Ti on k3s.
+# That pin shapes the storage:
+#   /config  local-path on quentin. Jellyfin's database is SQLite, which should not live on NFS.
+#            The claim is node-local, so the pod cannot move to k3s without losing it.
+#   /data    the Plex library, read-only over NFS from TrueNAS. The `media` PVC that Plex and the
+#            *arr apps mount is a local volume on k3s and cannot be reached from quentin.
+#            Requires an NFS share of /mnt/bulk_storage/media on 192.168.1.250 that
+#            192.168.1.252 may read. Until that exists the pod stays in ContainerCreating.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: jellyfin
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: jellyfin
+      name: jellyfin
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: quentin.lan
+      runtimeClassName: nvidia
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute,utility,video
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: all
+        image: lscr.io/linuxserver/jellyfin
+        imagePullPolicy: Always
+        name: jellyfin
+        ports:
+        - containerPort: 8096
+          name: jellyfin
+        # First start builds the database and can take a while on a large library.
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health
+            port: 8096
+          periodSeconds: 10
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /health
+            port: 8096
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8096
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: '6'
+            memory: 8Gi
+            nvidia.com/gpu: '1'
+          requests:
+            cpu: '1'
+            memory: 2Gi
+            nvidia.com/gpu: '1'
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /data
+          name: data
+          readOnly: true
+      volumes:
+      - name: data
+        nfs:
+          server: 192.168.1.250
+          path: /mnt/bulk_storage/media
+          readOnly: true
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: jellyfin
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 64Gi
+      storageClassName: local-path
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  ports:
+  - port: 8096
+    targetPort: 8096
+  selector:
+    podinate.com/pod: jellyfin
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: jellyfin
+  name: jellyfin
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jellyfin.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: jellyfin
+            port:
+              number: 8096
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - jellyfin.bloflix.com
+    secretName: jellyfin-tls
