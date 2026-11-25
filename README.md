@@ -59,7 +59,7 @@ so there is nothing to generate.
 
 | Group | Namespace(s) | Apps |
 |---|---|---|
-| `apps/media` | `media` | plex, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, tautulli, cleanuparr, storyteller, tdarr |
+| `apps/media` | `media` | plex, jellyfin, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, jellyseerr, tautulli, cleanuparr, storyteller, tdarr |
 | `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey |
 | `apps/projects/<ns>` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
 | `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, sealed-secrets, nextcloud, democratic-csi ×2 |
