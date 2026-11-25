@@ -1,0 +1,134 @@
+# A second Seerr instance, for Jellyfin. The existing `overseerr` app runs the same image but is
+# set up against Plex, and one Seerr instance supports only one media server type.
+# Point it at http://jellyfin.media.svc:8096 and the same Sonarr/Radarr in the setup wizard.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jellyseerr
+  namespace: media
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      podinate.com/pod: jellyseerr
+  serviceName: ''
+  template:
+    metadata:
+      labels:
+        podinate.com/pod: jellyseerr
+      name: jellyseerr
+    spec:
+      containers:
+      - env:
+        - name: PGID
+          value: '911'
+        - name: PUID
+          value: '911'
+        - name: TZ
+          value: Pacific/Auckland
+        image: ghcr.io/seerr-team/seerr:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /api/v1/status
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: jellyseerr
+        ports:
+        - containerPort: 5055
+          name: jellyseerr
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/v1/status
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /app/config
+          name: config
+        - mountPath: /config
+          name: config
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        volumeType: local
+      labels:
+        podinate.com/pod: jellyseerr
+      name: config
+      namespace: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: app-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyseerr
+  namespace: media
+spec:
+  ports:
+  - port: 5055
+    targetPort: 5055
+  selector:
+    podinate.com/pod: jellyseerr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  labels:
+    podinate.com/pod: jellyseerr
+  name: jellyseerr
+  namespace: media
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jellyseerr.bloflix.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: jellyseerr
+            port:
+              number: 5055
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - jellyseerr.bloflix.com
+    secretName: jellyseerr-tls
