@@ -134,7 +134,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: jellyfin.bloflix.com
+  - host: jellyfin.qinnovate.nz
     http:
       paths:
       - backend:
@@ -146,5 +146,5 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - jellyfin.bloflix.com
+    - jellyfin.qinnovate.nz
     secretName: jellyfin-tls

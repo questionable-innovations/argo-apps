@@ -118,7 +118,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: jellyseerr.bloflix.com
+  - host: seerr.qinnovate.nz
     http:
       paths:
       - backend:
@@ -130,5 +130,5 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - jellyseerr.bloflix.com
+    - seerr.qinnovate.nz
     secretName: jellyseerr-tls
