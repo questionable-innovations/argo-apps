@@ -1,0 +1,47 @@
+# Generates one Application per directory matching apps/minecraft/*; each holds only a
+# values.yaml for charts/minecraft. Adding a server is adding a directory; see README
+# "Minecraft servers". Same safety settings as the other groups (see games.yaml).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: minecraft
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/LaSpruca/argo-apps.git
+        revision: main
+        directories:
+          - path: apps/minecraft/*
+  syncPolicy:
+    applicationsSync: create-update
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{ .path.basename }}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: games
+      sources:
+        - repoURL: https://github.com/LaSpruca/argo-apps.git
+          targetRevision: main
+          path: charts/minecraft
+          helm:
+            releaseName: '{{ .path.basename }}'
+            valueFiles:
+              - '$values/{{ .path.path }}/values.yaml'
+        - repoURL: https://github.com/LaSpruca/argo-apps.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: games
+      syncPolicy:
+        # Auto-sync is deliberately off until each app's first diff has been reviewed.
+        # See README.md "Adopting the live cluster" before enabling it.
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

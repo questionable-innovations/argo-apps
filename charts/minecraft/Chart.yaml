@@ -1,0 +1,7 @@
+apiVersion: v2
+name: minecraft
+description: >-
+  One itzg/minecraft-server per release, with optional file browser, backups and sidecars.
+  Each server is a values file under apps/minecraft/<name>/; see README "Minecraft servers".
+type: application
+version: 0.1.0

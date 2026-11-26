@@ -1,0 +1,70 @@
+# Defaults for one Minecraft server. Override per server in apps/minecraft/<name>/values.yaml.
+# The release name (the directory name) names every object.
+
+image: itzg/minecraft-server:2026.11.1-java21
+
+# Hostname(s) players connect to. mc-router (apps/games/mc-router) routes by this, so there is
+# no per-server port to forward. Comma-separate several.
+hostname: ""
+
+# MEMORY for the JVM; the container limit is set from resources below, so leave headroom.
+memory: 4G
+
+resources:
+  requests: { cpu: "1", memory: 5Gi }
+  limits: { cpu: "4", memory: 6Gi }
+
+# Plain env for the server container (server.properties settings, TYPE, VERSION, ...).
+# Values must be strings.
+env: {}
+
+# An unpublished CurseForge modpack. When `manifest` is set, the server runs as AUTO_CURSEFORGE
+# from it; the manifest is the `manifest.json` of a CurseForge profile export.
+curseforge:
+  manifest: null
+  # Project IDs or slugs to skip on the server (client-only mods the pack doesn't flag as such).
+  excludeMods: []
+
+# Jars by URL (GitHub releases etc.), on top of the modpack. Removing an entry removes the jar.
+mods: []
+
+# SealedSecrets this server needs, as {name: {key: encryptedValue}}. Seal against the games
+# namespace with the exact name used here; see README "Sealed Secrets".
+sealedSecrets: {}
+
+# RCON is used by the backup sidecar and graceful shutdown. Its password comes from this
+# secret (key `password`), normally one of sealedSecrets above.
+rconSecret: ""
+
+storage:
+  className: local-path
+  size: 20Gi
+
+# Extra Service ports beside the game port, e.g. Simple Voice Chat's UDP port. Each gets its own
+# LoadBalancer Service, so klipper-lb binds it on the node IPs.
+extraPorts: []
+#  - name: voice
+#    port: 24454
+#    protocol: UDP
+
+nodeSelector: {}
+runtimeClassName: ""
+
+# Raw container specs added to the pod, e.g. a judge or proxy the server talks to on localhost.
+sidecars: []
+
+# Web file manager on the server's data, behind Traefik.
+files:
+  enabled: true
+  image: filebrowser/filebrowser:v2.63.23
+  hostname: ""
+
+# itzg/mc-backup: pauses saves over RCON, tars the world, prunes old archives.
+backup:
+  enabled: true
+  image: itzg/mc-backup:2026.11.2
+  interval: 24h
+  pruneDays: "14"
+  storage:
+    className: app-data
+    size: 50Gi

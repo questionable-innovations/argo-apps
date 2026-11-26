@@ -1,0 +1,93 @@
+# craft.qinnovate.nz: NeoForge 1.21.1, Create-based pack with Language Enforcer.
+hostname: craft.qinnovate.nz
+
+memory: 6G
+resources:
+  requests: { cpu: "1", memory: 7Gi }
+  limits: { cpu: "6", memory: 8Gi }
+
+storage:
+  size: 30Gi
+
+env:
+  DIFFICULTY: normal
+  MOTD: craft.qinnovate.nz
+  ALLOW_FLIGHT: "true"   # Create contraptions and Aeronautics trip the flight kick otherwise
+  VIEW_DISTANCE: "12"
+  SPAWN_PROTECTION: "0"
+
+# Early version of the pack, generated from the CurseForge profile. Replace with the full
+# profile export's manifest.json (as YAML) when it's ready; file IDs pin each mod.
+curseforge:
+  manifest:
+    minecraft:
+      version: "1.21.1"
+      modLoaders:
+        - { id: neoforge-21.1.268, primary: true }
+    manifestType: minecraftModpack
+    manifestVersion: 1
+    name: craft
+    version: "0.1.0"
+    author: questionable-innovations
+    overrides: overrides
+    files:
+      - { projectID: 328085, fileID: 7963363, required: true }   # Create 6.0.10
+      - { projectID: 676721, fileID: 9711672, required: true }   # Create Aeronautics 1.3.3
+      - { projectID: 1312371, fileID: 9043865, required: true }  # Sable 2.0.6
+      - { projectID: 659674, fileID: 8929365, required: true }   # Create Slice & Dice 4.3.4
+      - { projectID: 351264, fileID: 9641139, required: true }   # Kotlin for Forge 5.13.0
+      - { projectID: 398521, fileID: 8765184, required: true }   # Farmer's Delight 1.3.4
+      - { projectID: 416089, fileID: 8601207, required: true }   # Simple Voice Chat 2.6.22
+      - { projectID: 508933, fileID: 9004764, required: true }   # Distant Horizons 3.3.3
+      - { projectID: 1827987, fileID: 9824994, required: true }  # Forevercraft 0.2.0 (NeoForge 1.21.1)
+      # Client only, kept so the manifest matches the players' profile.
+      - { projectID: 394468, fileID: 8756580, required: true }   # Sodium
+      - { projectID: 455508, fileID: 8242804, required: true }   # Iris
+      - { projectID: 627557, fileID: 9687811, required: true }   # Complementary Reimagined (shaders)
+      # Disabled in the profile: Copper Age Backport (1386823:7283478), Iris Flywheel Compat.
+  excludeMods:
+    - 394468   # Sodium
+    - 455508   # Iris
+    - 627557   # Complementary Reimagined
+
+# Server-side only; players don't need it.
+mods:
+  - https://github.com/questionable-innovations/mc-language-enforcer/releases/download/v1.1.0/langenforcer-neoforge-1.21.1-1.1.0.jar
+
+# Simple Voice Chat. Clients use the server's hostname with this port, so it must stay 24454
+# unless voice_host is set in config/voicechat/voicechat-server.properties.
+extraPorts:
+  - name: voice
+    port: 24454
+    protocol: UDP
+
+# The Language Enforcer judge needs the GTX 1080, which is on quentin.
+nodeSelector:
+  kubernetes.io/hostname: quentin.lan
+runtimeClassName: nvidia
+
+sidecars:
+  # Speech judge for Language Enforcer; the mod calls it on http://127.0.0.1:7860.
+  - name: langenforcer
+    image: ghcr.io/questionable-innovations/mc-language-enforcer-sidecar:1.1.0
+    env:
+      - { name: LE_MODEL, value: auto }
+      - { name: NVIDIA_VISIBLE_DEVICES, value: all }
+      - { name: NVIDIA_DRIVER_CAPABILITIES, value: compute,utility }
+    ports:
+      - { name: judge, containerPort: 7860 }
+    readinessProbe:
+      httpGet: { path: /healthz, port: judge }
+      periodSeconds: 30
+    resources:
+      requests: { cpu: 500m, memory: 1Gi, nvidia.com/gpu: "1" }
+      limits: { memory: 3Gi, nvidia.com/gpu: "1" }
+
+files:
+  hostname: files-craft.qinnovate.nz
+
+rconSecret: craft-rcon
+sealedSecrets:
+  craft-rcon:
+    # PLACEHOLDER: seal a random password before syncing (README "Minecraft servers").
+    password: REPLACE_WITH_SEALED_VALUE

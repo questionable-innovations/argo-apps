@@ -1,0 +1,168 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  labels: {{- include "minecraft.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ .Release.Name }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  selector:
+    matchLabels: {{- include "minecraft.selector" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "minecraft.labels" . | nindent 8 }}
+      annotations:
+        # Roll the pod when the modpack changes; the server only reads it at startup.
+        checksum/modpack: {{ toJson .Values.curseforge | sha256sum }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.runtimeClassName }}
+      runtimeClassName: {{ . }}
+      {{- end }}
+      securityContext:
+        # itzg, mc-backup and filebrowser all run as 1000 and share the data volume.
+        fsGroup: 1000
+      # Lets the server save and stop over RCON before the pod is killed.
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: server
+          image: {{ .Values.image }}
+          env: {{- include "minecraft.serverEnv" . | nindent 12 }}
+          ports:
+            - name: minecraft
+              containerPort: 25565
+            {{- range .Values.extraPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+          # The first start downloads the modpack and NeoForge, which can take several minutes.
+          startupProbe:
+            exec: { command: [mc-health] }
+            periodSeconds: 10
+            failureThreshold: 90
+          livenessProbe:
+            exec: { command: [mc-health] }
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            {{- if .Values.curseforge.manifest }}
+            - name: modpack
+              mountPath: /modpack
+              readOnly: true
+            {{- end }}
+            {{- if .Values.rconSecret }}
+            - name: rcon
+              mountPath: /run/secrets/rcon
+              readOnly: true
+            {{- end }}
+        {{- if .Values.files.enabled }}
+        - name: files
+          image: {{ .Values.files.image }}
+          args:
+            - --address=0.0.0.0
+            - --port=8080
+            - --root=/srv
+            - --database=/database/filebrowser.db
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          ports:
+            - name: files
+              containerPort: 8080
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 256Mi }
+          volumeMounts:
+            - name: data
+              mountPath: /srv
+            - name: files-db
+              mountPath: /database
+        {{- end }}
+        {{- if .Values.backup.enabled }}
+        - name: backup
+          image: {{ .Values.backup.image }}
+          env:
+            - name: BACKUP_INTERVAL
+              value: {{ .Values.backup.interval | quote }}
+            - name: PRUNE_BACKUPS_DAYS
+              value: {{ .Values.backup.pruneDays | quote }}
+            - name: INITIAL_DELAY
+              value: 10m
+            - name: PAUSE_IF_NO_PLAYERS
+              value: "true"
+            - name: RCON_HOST
+              value: localhost
+            {{- if .Values.rconSecret }}
+            - name: RCON_PASSWORD_FILE
+              value: /run/secrets/rcon/password
+            {{- end }}
+            - name: TZ
+              value: Pacific/Auckland
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 512Mi }
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              readOnly: true
+            - name: backups
+              mountPath: /backups
+            {{- if .Values.rconSecret }}
+            - name: rcon
+              mountPath: /run/secrets/rcon
+              readOnly: true
+            {{- end }}
+        {{- end }}
+        {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- if .Values.curseforge.manifest }}
+        - name: modpack
+          configMap:
+            name: {{ .Release.Name }}-modpack
+        {{- end }}
+        {{- if .Values.rconSecret }}
+        - name: rcon
+          secret:
+            secretName: {{ .Values.rconSecret }}
+        {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: {{ .Values.storage.className }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.size }}
+    {{- if .Values.files.enabled }}
+    - metadata:
+        name: files-db
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 1Gi
+    {{- end }}
+    {{- if .Values.backup.enabled }}
+    - metadata:
+        name: backups
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: {{ .Values.backup.storage.className }}
+        resources:
+          requests:
+            storage: {{ .Values.backup.storage.size }}
+    {{- end }}
