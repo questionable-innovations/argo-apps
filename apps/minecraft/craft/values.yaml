@@ -73,7 +73,7 @@ sidecars:
     env:
       - { name: LE_MODEL, value: auto }
       - { name: NVIDIA_VISIBLE_DEVICES, value: all }
-      - { name: NVIDIA_DRIVER_CAPABILITIES, value: compute,utility }
+      - { name: NVIDIA_DRIVER_CAPABILITIES, value: "compute,utility" }
     ports:
       - { name: judge, containerPort: 7860 }
     readinessProbe:
