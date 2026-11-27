@@ -113,7 +113,7 @@ the server is pinned to quentin. Voice chat is UDP 24454 on its own LoadBalancer
 
 Before the first sync:
 
-1. Seal `craft-rcon` (above) and replace the placeholder in `apps/minecraft/craft/values.yaml`.
+1. Make the `mc-language-enforcer-sidecar` ghcr package public, or the judge sidecar can't pull.
 2. Point DNS for `craft.qinnovate.nz` and `files-craft.qinnovate.nz` at the house.
 3. Forward 25565/tcp and 24454/udp on the router to 192.168.1.251.
 
