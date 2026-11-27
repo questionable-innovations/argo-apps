@@ -1,0 +1,79 @@
+# mc-router: one Minecraft port (25565) for every server in `games`, routed by the hostname the
+# client connects with. It watches Services annotated `mc-router.itzg.me/externalServerName`,
+# which charts/minecraft sets from `hostname`. Older servers still use their pinned NodePorts.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mc-router
+  namespace: games
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mc-router
+  namespace: games
+rules:
+  - apiGroups: [""]
+    resources: [services]
+    verbs: [watch, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mc-router
+  namespace: games
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mc-router
+subjects:
+  - kind: ServiceAccount
+    name: mc-router
+    namespace: games
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-router
+  namespace: games
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mc-router
+  template:
+    metadata:
+      labels:
+        app: mc-router
+    spec:
+      serviceAccountName: mc-router
+      containers:
+        - name: mc-router
+          image: itzg/mc-router:1.57.0
+          args: [--in-kube-cluster]
+          env:
+            - name: KUBE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: minecraft
+              containerPort: 25565
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { memory: 128Mi }
+---
+# klipper-lb binds 25565 on the node IPs (192.168.1.251 is the one the router forwards to).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mc-router
+  namespace: games
+spec:
+  type: LoadBalancer
+  selector:
+    app: mc-router
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: minecraft

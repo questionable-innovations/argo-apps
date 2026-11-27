@@ -1,3 +1,5 @@
 # Helm chart caches, if anyone runs `helm dependency build` locally
 charts/
+# ...but not the in-repo charts at the root.
+!/charts/
 Chart.lock

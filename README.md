@@ -13,16 +13,20 @@ the live cluster at time of writing. Nothing here is aspirational; it is what is
 bootstrap/            Applied by hand once; everything else follows from it
   projects.yaml       AppProjects (bootstrap / infra / media / projects / games)
   root.yaml           The app-of-apps root -> bootstrap/apps/
-  apps/               media/games/projects ApplicationSets, the infra group Application, static
+  apps/               media/games/minecraft/projects ApplicationSets, the infra group Application, static
 
 apps/
   media/<app>/        Plain manifests — one Application generated per directory
   games/<app>/        Plain manifests — one Application generated per directory
+  minecraft/<server>/ values.yaml for charts/minecraft, one Application per directory
   projects/<namespace>/<app>/
                       Plain manifests — namespace taken from the path
   infra/
     <app>.yaml        Hand-written Application (Helm chart + version + values)
     <app>/            Its Helm values (and any extra manifests)
+
+charts/
+  minecraft/          In-repo chart for one Minecraft server (see "Minecraft servers")
 
 static/
   manifests/          Shared cluster resources no single app owns
@@ -40,6 +44,7 @@ directory:
 |---|---|---|
 | `media` | `apps/media/*` | `media` |
 | `games` | `apps/games/*` | `games` |
+| `minecraft` | `apps/minecraft/*` (values for `charts/minecraft`) | `games` |
 | `projects` | `apps/projects/*/*` | the `<namespace>` path segment (`rebnz`, `russell`, `default`) |
 
 A new projects namespace also needs adding to the `projects` AppProject's `destinations` and
@@ -60,12 +65,57 @@ so there is nothing to generate.
 | Group | Namespace(s) | Apps |
 |---|---|---|
 | `apps/media` | `media` | plex, jellyfin, sonarr, radarr, prowlarr, nzbget, qbittorrent, overseerr, jellyseerr, tautulli, cleanuparr, storyteller, tdarr |
-| `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey |
+| `apps/games` | `games` | caleb-mc, vanilla-mc, divine-journey, mc-router |
+| `apps/minecraft` | `games` | craft |
 | `apps/projects/<ns>` | `rebnz`, `russell`, `default` | docuseal, domainmod, grafana, uptime-kuma, pingvin-share, stirling-pdf, tailscale, falderia, mcp-servers, ghost |
 | `apps/infra` | various | cert-manager, gpu-operator, ingress-nginx, traefik, keel, sealed-secrets, nextcloud, democratic-csi ×2 |
 
 `tdarr` is one Application covering the `tdarr` and `tdarr-node` StatefulSets, the two
 pause/unpause CronJobs, and the `tdarr-scaler` ServiceAccount/Role/RoleBinding they use.
+
+## Minecraft servers
+
+New servers are a `values.yaml` in `apps/minecraft/<name>/`, rendered by `charts/minecraft` (an
+`itzg/minecraft-server` StatefulSet). Copy `apps/minecraft/craft/` and edit it. The chart's
+`values.yaml` documents every option. Each server gets:
+
+- **Routing by hostname.** `hostname` annotates the Service for **mc-router**
+  (`apps/games/mc-router`), which holds the one public Minecraft port, 25565, on a LoadBalancer.
+  No per-server NodePort or router port-forward. The older servers keep their NodePorts below.
+- **Mods from git.** `curseforge.manifest` is the `manifest.json` from a CurseForge profile export
+  (Export Profile in the CurseForge app), written as YAML, with file IDs pinning each mod. No
+  published pack is needed. `curseforge.excludeMods` drops client-only mods, and `mods` adds jars by
+  URL (GitHub releases). Changing either rolls the pod.
+- **A file browser** at `files.hostname`, on the server's data. On first start it creates
+  `admin` with a random password, printed once in its log:
+  `kubectl --context martin -n games logs <name>-0 -c files | grep -i password`.
+- **Backups** by `itzg/mc-backup`: daily tarballs on `app-data` (TrueNAS), 14 days kept. The
+  world itself is on `local-path`, so the backups are what get it off the node.
+- **Ports other than Minecraft** (`extraPorts`, such as Simple Voice Chat's UDP port) each get their
+  own LoadBalancer Service, because mc-router only proxies the Minecraft protocol.
+
+The RCON password, used by backups and graceful shutdown, is a SealedSecret in the values:
+
+```sh
+kubectl create secret generic <name>-rcon -n games \
+  --from-literal=password="$(openssl rand -hex 24)" --dry-run=client -o yaml \
+  | kubeseal --context martin --format yaml | grep -A1 encryptedData
+```
+
+Console: `kubectl --context martin -n games exec -it <name>-0 -c server -- rcon-cli`.
+
+### craft
+
+**craft.qinnovate.nz**: NeoForge 1.21.1, a Create-based pack, Simple Voice Chat and
+[Language Enforcer](https://github.com/questionable-innovations/mc-language-enforcer). The mod's
+speech judge runs as a sidecar on `127.0.0.1:7860` with one of the GTX 1080's time-sliced slots, so
+the server is pinned to quentin. Voice chat is UDP 24454 on its own LoadBalancer.
+
+Before the first sync:
+
+1. Make the `mc-language-enforcer-sidecar` ghcr package public, or the judge sidecar can't pull.
+2. Point DNS for `craft.qinnovate.nz` and `files-craft.qinnovate.nz` at the house.
+3. Forward 25565/tcp and 24454/udp on the router to 192.168.1.251.
 
 ## Helm
 
@@ -217,7 +267,7 @@ kubectl --context martin apply -f bootstrap/root.yaml
 ```
 
 The root app creates the ApplicationSets and the infra group Application, which together create
-the 33 leaf Applications. They will
+the 35 leaf Applications. They will
 all report `OutOfSync` initially — that is expected, because Argo has not yet stamped its
 tracking label on anything. Sync them one at a time and confirm the diff is only labels.
 

@@ -1,0 +1,47 @@
+# The game port is ClusterIP only: players reach it through mc-router by hostname.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels: {{- include "minecraft.labels" . | nindent 4 }}
+  {{- with .Values.hostname }}
+  annotations:
+    mc-router.itzg.me/externalServerName: {{ . | quote }}
+  {{- end }}
+spec:
+  selector: {{- include "minecraft.selector" . | nindent 4 }}
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: minecraft
+{{- range .Values.extraPorts }}
+---
+# mc-router only proxies the Minecraft protocol, so other ports get their own LoadBalancer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ .name }}
+  labels: {{- include "minecraft.labels" $ | nindent 4 }}
+spec:
+  type: LoadBalancer
+  selector: {{- include "minecraft.selector" $ | nindent 4 }}
+  ports:
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+{{- end }}
+{{- if .Values.files.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-files
+  labels: {{- include "minecraft.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "minecraft.selector" . | nindent 4 }}
+  ports:
+    - name: files
+      port: 8080
+      targetPort: files
+{{- end }}

@@ -1,0 +1,53 @@
+{{- with .Values.curseforge.manifest }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-modpack
+  labels: {{- include "minecraft.labels" $ | nindent 4 }}
+data:
+  manifest.json: {{ toPrettyJson . | quote }}
+{{- end }}
+{{- if and .Values.files.enabled .Values.files.hostname }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-files
+  labels: {{- include "minecraft.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    # Uploading mods and worlds; no body limit.
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+spec:
+  # `nginx` is the class every Ingress in this repo uses; Traefik serves it.
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.files.hostname }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-files
+                port:
+                  number: 8080
+  tls:
+    - hosts: [{{ .Values.files.hostname }}]
+      secretName: {{ .Release.Name }}-files-tls
+{{- end }}
+{{- range $name, $data := .Values.sealedSecrets }}
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  encryptedData: {{- toYaml $data | nindent 4 }}
+  template:
+    metadata:
+      name: {{ $name }}
+      namespace: {{ $.Release.Namespace }}
+{{- end }}
